@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: guidify
+      POSTGRES_PASSWORD: guidify_password
+      POSTGRES_DB: guidify_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - guidify_network
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://guidify:guidify_password@postgres:5432/guidify_db
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+    networks:
+      - guidify_network
+    command: poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - guidify_network
+    command: yarn start
+
+volumes:
+  postgres_data:
+
+networks:
+  guidify_network:
+    driver: bridge

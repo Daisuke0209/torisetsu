@@ -1,0 +1,16 @@
+/* Modern Manual Create Styles - Minimal custom CSS as we use Tailwind utilities */
+
+/* Custom select styles for better cross-browser consistency */
+select:focus {
+  outline: none;
+}
+
+/* Smooth transitions for interactive elements */
+.form-transition {
+  transition: all 0.3s ease;
+}
+
+/* Additional states for form elements - if needed in the future */
+.form-element-focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
