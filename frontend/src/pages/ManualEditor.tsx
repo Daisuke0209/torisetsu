@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import client from '../api/client';
+import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import Input from '../components/ui/Input';
-import { Badge } from '../components/ui/badge';
 import { 
   FileTextIcon, 
-  PlayIcon,
   RefreshIcon,
   AlertCircleIcon,
-  CheckCircleIcon,
   ClockIcon,
   EditIcon,
   SaveIcon,
@@ -22,7 +19,7 @@ import {
   CopyIcon
 } from '../components/ui/Icons';
 import Header from '../components/ui/Header';
-import { getStatusColor, getStatusText } from '../lib/status-colors';
+import { getStatusColor } from '../lib/status-colors';
 import { ManualStatus } from '../types';
 import './ManualEditor.css';
 
@@ -37,13 +34,6 @@ interface Manual {
   version?: string;
   created_at?: string;
   updated_at?: string;
-}
-
-interface Project {
-  id: number;
-  name: string;
-  description?: string;
-  creator_id: string;
 }
 
 interface ManualContent {
@@ -66,9 +56,7 @@ interface ManualContent {
 const ManualEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [manual, setManual] = useState<Manual | null>(null);
-  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
@@ -98,10 +86,16 @@ const ManualEditor: React.FC = () => {
       
       // クリップボードにコピー
       await navigator.clipboard.writeText(fullUrl);
-      alert('共有URLをクリップボードにコピーしました！');
+      toast.success('共有URLを作成しました！', {
+        duration: 4000,
+        icon: '🔗',
+      });
     } catch (error) {
       console.error('シェア作成に失敗しました:', error);
-      alert('共有URLの作成に失敗しました');
+      toast.error('共有URLの作成に失敗しました', {
+        duration: 4000,
+        icon: '❌',
+      });
     } finally {
       setShareLoading(false);
     }
@@ -112,25 +106,19 @@ const ManualEditor: React.FC = () => {
     
     try {
       await navigator.clipboard.writeText(shareUrl);
-      alert('URLをコピーしました！');
+      toast.success('URLをコピーしました！', {
+        duration: 3000,
+        icon: '📋',
+      });
     } catch (error) {
       console.error('クリップボードへのコピーに失敗しました:', error);
-      alert('URLのコピーに失敗しました');
+      toast.error('URLのコピーに失敗しました', {
+        duration: 4000,
+        icon: '❌',
+      });
     }
   };
 
-  // ステップの時間に移動
-  const jumpToStep = (step: any, stepIndex: number) => {
-    if (!videoRef || !step.time) return;
-
-    const seconds = parseTimeToSeconds(step.time);
-    videoRef.currentTime = seconds;
-    
-    // 動画が停止中なら再生開始
-    if (videoRef.paused) {
-      videoRef.play();
-    }
-  };
 
   // 現在の動画時間に基づいて現在のステップを取得
   const getCurrentStep = (currentTime: number) => {
@@ -169,10 +157,6 @@ const ManualEditor: React.FC = () => {
         const manualData = response.data;
         setManual(manualData);
 
-        // プロジェクト情報を取得
-        const projectResponse = await client.get(`/api/projects/detail/${manualData.project_id}`);
-        const projectData = projectResponse.data;
-        setProject(projectData);
 
       } catch (err: any) {
         setError(err.response?.data?.detail || 'マニュアルの取得に失敗しました');
@@ -588,26 +572,6 @@ const ManualEditor: React.FC = () => {
     );
   };
 
-  const getStatusBadge = () => {
-    if (!manual?.status) return null;
-    const statusColor = getStatusColor(manual.status);
-    const statusText = getStatusText(manual.status);
-    
-    const iconMap = {
-      [ManualStatus.DRAFT]: FileTextIcon,
-      [ManualStatus.PROCESSING]: ClockIcon,
-      [ManualStatus.COMPLETED]: CheckCircleIcon,
-      [ManualStatus.FAILED]: AlertCircleIcon,
-      [ManualStatus.REVIEW]: FileTextIcon,
-      [ManualStatus.PUBLISHED]: FileTextIcon
-    };
-    
-    return {
-      variant: statusColor.variant,
-      text: statusText,
-      icon: iconMap[manual.status] || FileTextIcon
-    };
-  };
 
   if (loading) {
     return <div className="loading">読み込み中...</div>;
@@ -634,25 +598,56 @@ const ManualEditor: React.FC = () => {
 
         {/* マニュアル情報 */}
         <div className="mb-8">
-          <div className="flex items-center space-x-4">
-            <div className={`h-12 w-12 rounded-xl flex items-center justify-center shadow-lg ${getStatusColor(manual.status).container}`}>
-              <FileTextIcon size={24} className={
-                manual.status === ManualStatus.PROCESSING 
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : manual.status === ManualStatus.COMPLETED
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-slate-600 dark:text-slate-400'
-              } />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{manual.title}</h1>
-              <div className="flex items-center space-x-2 mt-1">
-                {getStatusBadge() && (
-                  <Badge variant={getStatusBadge()!.variant} className={`text-xs ${getStatusColor(manual.status).badge.border} ${getStatusColor(manual.status).badge.text} ${getStatusColor(manual.status).badge.bg} ${getStatusColor(manual.status).badge.hover}`}>
-                    {getStatusBadge()!.text}
-                  </Badge>
-                )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className={`h-12 w-12 rounded-xl flex items-center justify-center shadow-lg ${getStatusColor(manual.status).container}`}>
+                <FileTextIcon size={24} className={
+                  manual.status === ManualStatus.PROCESSING 
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : manual.status === ManualStatus.COMPLETED
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-slate-600 dark:text-slate-400'
+                } />
               </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{manual.title}</h1>
+              </div>
+            </div>
+            {/* 共有URL機能 */}
+            <div className="flex items-center space-x-2">
+              {!shareUrl ? (
+                <Button
+                  onClick={handleCreateShare}
+                  disabled={shareLoading}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-1 border-blue-600 text-blue-600 hover:bg-blue-50 text-xs"
+                >
+                  <ShareIcon size={14} />
+                  <span>{shareLoading ? '作成中...' : '共有URL作成'}</span>
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={handleCopyUrl}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-1 text-green-600 hover:bg-green-50 border-green-600 text-xs"
+                  >
+                    <CopyIcon size={14} />
+                    <span>URLコピー</span>
+                  </Button>
+                  <Button
+                    onClick={() => setShareUrl(null)}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-1 text-red-600 hover:bg-red-50 border-red-600 text-xs"
+                  >
+                    <XIcon size={14} />
+                    <span>停止</span>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -696,36 +691,6 @@ const ManualEditor: React.FC = () => {
                   お使いのブラウザは動画再生に対応していません。
                 </video>
                 
-                {/* 再生専用モードボタン */}
-                <div className="mt-4 flex justify-end space-x-2">
-                  <Button
-                    onClick={() => navigate(`/manual/${id}/playback`)}
-                    variant="default"
-                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
-                  >
-                    <PlayIcon size={20} />
-                    <span>再生専用モードで表示</span>
-                  </Button>
-                  <Button
-                    onClick={handleCreateShare}
-                    disabled={shareLoading}
-                    variant="outline"
-                    className="flex items-center space-x-2 border-blue-600 text-blue-600 hover:bg-blue-50"
-                  >
-                    <ShareIcon size={20} />
-                    <span>{shareLoading ? '作成中...' : '共有URLを作成'}</span>
-                  </Button>
-                  {shareUrl && (
-                    <Button
-                      onClick={handleCopyUrl}
-                      variant="ghost"
-                      className="flex items-center space-x-2 text-green-600 hover:bg-green-50"
-                    >
-                      <CopyIcon size={20} />
-                      <span>URLをコピー</span>
-                    </Button>
-                  )}
-                </div>
                 
                 {/* 現在のステップ表示 */}
                 {manual.content && typeof manual.content === 'object' && currentStepIndex !== null && (
