@@ -26,14 +26,12 @@ import { getStatusColor, getStatusText } from '../lib/status-colors';
 const TorisetsuDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { t } = useLanguage();
+  const { } = useAuth();
+  const { } = useLanguage();
   const [torisetsu, setTorisetsu] = useState<Torisetsu | null>(null);
   const [manuals, setManuals] = useState<Manual[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [showManualDeleteModal, setShowManualDeleteModal] = useState(false);
   const [deletingManual, setDeletingManual] = useState(false);
   const [manualToDelete, setManualToDelete] = useState<Manual | null>(null);
@@ -42,7 +40,7 @@ const TorisetsuDetail: React.FC = () => {
   const [savingName, setSavingName] = useState(false);
   const previousManualsRef = useRef<Manual[]>([]);
 
-  const fetchTorisetsuData = async () => {
+  const fetchTorisetsuData = React.useCallback(async () => {
     try {
       // トリセツ情報を取得
       const torisetsuResponse = await client.get(`/api/torisetsu/detail/${id}`);
@@ -72,11 +70,11 @@ const TorisetsuDetail: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchTorisetsuData();
-  }, [id]);
+  }, [id, fetchTorisetsuData]);
 
   // ステータス変化を検知してトースト通知を表示
   useEffect(() => {

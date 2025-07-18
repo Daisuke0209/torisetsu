@@ -14,7 +14,7 @@ import Header from '../components/ui/Header';
 const TorisetsuCreate: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { } = useAuth();
   
   const { projectId, projectName } = location.state || {};
   
@@ -42,7 +42,6 @@ const TorisetsuCreate: React.FC = () => {
         name: name.trim()
       });
 
-      const newTorisetsu = response.data;
       toast.success('トリセツを作成しました');
       
       // プロジェクト詳細画面に戻る

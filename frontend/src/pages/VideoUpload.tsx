@@ -3,10 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import client from '../api/client';
 import Button from '../components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/badge';
 import { 
-  ArrowLeftIcon, 
   UploadIcon, 
   FileIcon, 
   CheckCircleIcon,
@@ -36,7 +35,7 @@ const VideoUpload: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<UploadResponse | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const { user } = useAuth();
+  const { } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState;
