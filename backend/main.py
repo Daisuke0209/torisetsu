@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
 from database import engine, Base
-from routers import auth, projects, manuals, upload
+from routers import auth, projects, manuals, upload, torisetsu
 from config import settings
 
 # .envファイルから環境変数を読み込む
@@ -42,6 +42,7 @@ app.add_middleware(
 # ルーターを登録
 app.include_router(auth.router, prefix="/api/auth", tags=["認証"])
 app.include_router(projects.router, prefix="/api/projects", tags=["プロジェクト"])
+app.include_router(torisetsu.router, prefix="/api/torisetsu", tags=["トリセツ"])
 app.include_router(manuals.router, prefix="/api/manuals", tags=["マニュアル"])
 app.include_router(upload.router, prefix="/api/upload", tags=["アップロード"])
 

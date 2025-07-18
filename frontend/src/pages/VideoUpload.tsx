@@ -25,6 +25,8 @@ interface UploadResponse {
 interface LocationState {
   projectId?: string;
   projectName?: string;
+  torisetsuId?: string;
+  torisetsuName?: string;
 }
 
 const VideoUpload: React.FC = () => {
@@ -179,8 +181,8 @@ const VideoUpload: React.FC = () => {
                     onClick={() => navigate('/manual/create', { 
                       state: { 
                         videoPath: success.file_path,
-                        projectId: state?.projectId,
-                        projectName: state?.projectName,
+                        torisetsuId: state?.torisetsuId,
+                        torisetsuName: state?.torisetsuName,
                       } 
                     })}
                   >
@@ -286,7 +288,7 @@ const VideoUpload: React.FC = () => {
                   <div className="flex justify-end space-x-3">
                     <Button
                       variant="outline"
-                      onClick={() => navigate(state?.projectId ? `/project/${state.projectId}` : '/')}
+                      onClick={() => navigate(state?.torisetsuId ? `/torisetsu/${state.torisetsuId}` : '/')}
                     >
                       キャンセル
                     </Button>

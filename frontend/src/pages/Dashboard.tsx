@@ -22,26 +22,16 @@ const Dashboard: React.FC = () => {
   const [newProjectName, setNewProjectName] = useState('');
 
   useEffect(() => {
-    console.log('Dashboard mounted');
-    console.log('Current user:', user);
-    console.log('Token:', localStorage.getItem('token'));
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      console.log('データ取得開始');
       // プロジェクト一覧を直接取得
       const projectsResponse = await client.get('/api/projects/');
-      console.log('取得したプロジェクト:', projectsResponse.data);
-      console.log('各プロジェクトのmanual_count:');
-      projectsResponse.data.forEach((project: any) => {
-        console.log(`  ${project.name}: manual_count = ${project.manual_count}`);
-      });
       setProjects(projectsResponse.data);
     } catch (error: any) {
       console.error('データ取得エラー:', error);
-      console.error('エラー詳細:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -53,13 +43,7 @@ const Dashboard: React.FC = () => {
     
     setCreating(true);
     try {
-      console.log('プロジェクト作成開始');
-      console.log('フォームデータ:', { 
-        name: newProjectName
-      });
-
       if (!newProjectName.trim()) {
-        console.error('プロジェクト名が入力されていません');
         alert('プロジェクト名を入力してください');
         return;
       }
@@ -68,13 +52,11 @@ const Dashboard: React.FC = () => {
         name: newProjectName,
       });
       
-      console.log('プロジェクト作成成功:', response.data);
       setShowCreateModal(false);
       setNewProjectName('');
-      await fetchData(); // awaitを追加
+      await fetchData();
     } catch (error: any) {
       console.error('プロジェクト作成エラー:', error);
-      console.error('エラー詳細:', error.response?.data);
       alert(`プロジェクトの作成に失敗しました: ${error.response?.data?.detail || error.message}`);
     } finally {
       setCreating(false);
@@ -119,7 +101,7 @@ const Dashboard: React.FC = () => {
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
           >
             <PlusIcon size={16} />
-            新規プロジェクト
+            プロジェクトを作成
           </Button>
         </div>
 
@@ -160,9 +142,9 @@ const Dashboard: React.FC = () => {
                   <CardContent className="pt-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        {project.manual_count !== undefined && project.manual_count !== null && (
+                        {project.torisetsu_count !== undefined && project.torisetsu_count !== null && (
                           <Badge variant="outline" className="text-xs border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20">
-                            {project.manual_count}件
+                            {project.torisetsu_count}件
                           </Badge>
                         )}
                       </div>

@@ -16,7 +16,7 @@ class Project(ProjectBase):
     creator_id: str
     created_at: datetime
     updated_at: datetime
-    manual_count: Optional[int] = None
+    torisetsu_count: Optional[int] = None
     
     class Config:
         from_attributes = True

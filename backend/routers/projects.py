@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Annotated
 
 from database import get_db
-from models import User, Project, Manual
+from models import User, Project, Manual, Torisetsu
 from schemas import ProjectCreate, ProjectUpdate, Project as ProjectSchema
 from routers.auth import get_current_user
 
@@ -32,10 +32,10 @@ async def list_projects(
 ):
     projects = db.query(Project).filter(Project.creator_id == current_user.id).all()
     
-    # 各プロジェクトのマニュアル数を取得
+    # 各プロジェクトのトリセツ数を取得
     for project in projects:
-        manual_count = db.query(Manual).filter(Manual.project_id == project.id).count()
-        project.manual_count = manual_count
+        torisetsu_count = db.query(Torisetsu).filter(Torisetsu.project_id == project.id).count()
+        project.torisetsu_count = torisetsu_count
     
     return projects
 
@@ -51,6 +51,10 @@ async def get_project(
     ).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+    
+    # トリセツ数を取得
+    torisetsu_count = db.query(Torisetsu).filter(Torisetsu.project_id == project.id).count()
+    project.torisetsu_count = torisetsu_count
     
     return project
 
@@ -92,8 +96,10 @@ async def delete_project(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     
-    # 関連するマニュアルをRaw SQLで削除（enum変換エラーを回避）
-    db.execute(text("DELETE FROM manuals WHERE project_id = :project_id"), {"project_id": project_id})
+    # 関連するマニュアルとトリセツをRaw SQLで削除（enum変換エラーを回避）
+    # 正しい削除順序: 1. マニュアル 2. トリセツ 3. プロジェクト
+    db.execute(text("DELETE FROM manuals WHERE torisetsu_id IN (SELECT id FROM torisetsu WHERE project_id = :project_id)"), {"project_id": project_id})
+    db.execute(text("DELETE FROM torisetsu WHERE project_id = :project_id"), {"project_id": project_id})
     
     # プロジェクトを削除
     db.delete(project)
