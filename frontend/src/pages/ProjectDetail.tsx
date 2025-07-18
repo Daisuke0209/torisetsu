@@ -1,38 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
 import client from '../api/client';
-import { Project, Manual, ManualStatus } from '../types';
+import { Project, Torisetsu } from '../types';
 import Button from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { Badge } from '../components/ui/badge';
 import { 
   FileTextIcon,
-  CalendarIcon,
-  UploadIcon,
   TrashIcon,
-  LoaderIcon,
-  LogOutIcon,
   FolderIcon
 } from '../components/ui/Icons';
 import Header from '../components/ui/Header';
-import { getStatusColor, getStatusText } from '../lib/status-colors';
 
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
-  const [manuals, setManuals] = useState<Manual[]>([]);
+  const [torisetsuList, setTorisetsuList] = useState<Torisetsu[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [showManualDeleteModal, setShowManualDeleteModal] = useState(false);
-  const [deletingManual, setDeletingManual] = useState(false);
-  const [manualToDelete, setManualToDelete] = useState<Manual | null>(null);
-  const previousManualsRef = useRef<Manual[]>([]);
+  const [showTorisetsuDeleteModal, setShowTorisetsuDeleteModal] = useState(false);
+  const [deletingTorisetsu, setDeletingTorisetsu] = useState(false);
+  const [torisetsuToDelete, setTorisetsuToDelete] = useState<Torisetsu | null>(null);
 
   const fetchProjectData = async () => {
     try {
@@ -41,13 +32,22 @@ const ProjectDetail: React.FC = () => {
       const projectData = projectResponse.data;
       setProject(projectData);
       
-      // マニュアル一覧を取得
-      const manualsResponse = await client.get(`/api/manuals/project/${id}`);
-      setManuals(manualsResponse.data);
-      return manualsResponse.data;
+      // トリセツ一覧を取得
+      try {
+        const torisetsuResponse = await client.get(`/api/torisetsu/project/${id}`);
+        setTorisetsuList(torisetsuResponse.data);
+        return torisetsuResponse.data;
+      } catch (torisetsuError: any) {
+        // トリセツの取得に失敗した場合でも、プロジェクトは表示する
+        if (torisetsuError.response?.status === 404) {
+          setTorisetsuList([]);
+        } else {
+          throw torisetsuError; // その他のエラーは再スロー
+        }
+        return [];
+      }
     } catch (error: any) {
       console.error('Failed to fetch project data:', error);
-      console.error('Error details:', error.response?.data);
       
       let errorMessage = 'プロジェクトの読み込みに失敗しました';
       if (error.response?.status === 404) {
@@ -71,76 +71,7 @@ const ProjectDetail: React.FC = () => {
     fetchProjectData();
   }, [id]); // fetchProjectDataはstableな関数なので依存配列に含めない
 
-  // ステータス変化を検知してトースト通知を表示
-  useEffect(() => {
-    if (previousManualsRef.current.length === 0) {
-      previousManualsRef.current = manuals;
-      return;
-    }
-
-    const previousManuals = previousManualsRef.current;
-    
-    // 生成完了したマニュアルを検出
-    manuals.forEach(currentManual => {
-      const previousManual = previousManuals.find(m => m.id === currentManual.id);
-      
-      if (previousManual && 
-          previousManual.status === 'processing' && 
-          currentManual.status === 'completed') {
-        
-        toast.success(
-          `マニュアル「${currentManual.title}」の生成が完了しました！`,
-          {
-            duration: 5000,
-            icon: '✅',
-          }
-        );
-      }
-      
-      // 生成失敗の場合
-      if (previousManual && 
-          previousManual.status === 'processing' && 
-          currentManual.status === 'failed') {
-        
-        toast.error(
-          `マニュアル「${currentManual.title}」の生成に失敗しました`,
-          {
-            duration: 6000,
-            icon: '❌',
-          }
-        );
-      }
-    });
-
-    previousManualsRef.current = manuals;
-  }, [manuals]);
-
-  // ポーリング用のuseEffect - 生成中のマニュアルがある場合のみ実行
-  useEffect(() => {
-    const hasProcessingManuals = manuals.some(manual => manual.status === 'processing');
-    
-    if (!hasProcessingManuals) {
-      return;
-    }
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const manualsResponse = await client.get(`/api/manuals/project/${id}`);
-        const updatedManuals = manualsResponse.data;
-        setManuals(updatedManuals);
-        
-        // すべてのマニュアルが生成完了している場合はポーリングを停止
-        const stillProcessing = updatedManuals.some((manual: Manual) => manual.status === 'processing');
-        if (!stillProcessing) {
-          clearInterval(pollInterval);
-        }
-      } catch (error) {
-        console.error('Failed to poll manual status:', error);
-      }
-    }, 3000); // 3秒間隔でポーリング
-
-    return () => clearInterval(pollInterval);
-  }, [id, manuals]);
+  // トリセツ管理のロジック（ポーリングなどは今のところ不要）
 
 
 
@@ -160,106 +91,126 @@ const ProjectDetail: React.FC = () => {
     }
   };
 
-  const handleDeleteManual = async () => {
-    if (!manualToDelete) return;
+  const handleDeleteTorisetsu = async () => {
+    if (!torisetsuToDelete) return;
     
-    const manualTitle = manualToDelete.title;
-    setDeletingManual(true);
+    const torisetsuName = torisetsuToDelete.name;
+    setDeletingTorisetsu(true);
     try {
-      await client.delete(`/api/manuals/${manualToDelete.id}`);
-      // マニュアル一覧から削除したマニュアルを除外
-      setManuals(manuals.filter(m => m.id !== manualToDelete.id));
+      await client.delete(`/api/torisetsu/${torisetsuToDelete.id}`);
+      // トリセツ一覧から削除したトリセツを除外
+      setTorisetsuList(torisetsuList.filter(t => t.id !== torisetsuToDelete.id));
       
       // 削除成功の通知
       toast.success(
-        `マニュアル「${manualTitle}」を削除しました`,
+        `トリセツ「${torisetsuName}」を削除しました`,
         {
           duration: 3000,
           icon: '🗑️',
         }
       );
     } catch (error: any) {
-      console.error('Failed to delete manual:', error);
+      console.error('Failed to delete torisetsu:', error);
       
       // 削除失敗の通知
       toast.error(
-        error.response?.data?.detail || 'マニュアルの削除に失敗しました',
+        error.response?.data?.detail || 'トリセツの削除に失敗しました',
         {
           duration: 4000,
           icon: '❌',
         }
       );
     } finally {
-      setDeletingManual(false);
-      setShowManualDeleteModal(false);
-      setManualToDelete(null);
+      setDeletingTorisetsu(false);
+      setShowTorisetsuDeleteModal(false);
+      setTorisetsuToDelete(null);
     }
   };
 
-  const handleShowManualDeleteModal = (manual: Manual, e: React.MouseEvent) => {
+  const handleShowTorisetsuDeleteModal = (torisetsu: Torisetsu, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setManualToDelete(manual);
-    setShowManualDeleteModal(true);
+    setTorisetsuToDelete(torisetsu);
+    setShowTorisetsuDeleteModal(true);
   };
 
-  const renderManualCardContent = (manual: Manual, isProcessing: boolean) => (
+  const renderTorisetsuCardContent = (torisetsu: Torisetsu) => (
     <>
-      {/* 動画サムネイル */}
-      {manual.video_file_path && (
-        <video 
-          className="w-full h-40 object-cover rounded-t-lg"
-          preload="metadata"
-          muted
-        >
-          <source 
-            src={`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/uploads/${manual.video_file_path.split('/').pop()}#t=1`} 
-            type="video/mp4" 
-          />
-        </video>
-      )}
-
-      <CardHeader className={manual.video_file_path ? "pb-2" : ""}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 flex-1 min-w-0">
-            <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${getStatusColor(manual.status).container}`}>
-              {manual.status === ManualStatus.PROCESSING ? (
-                <LoaderIcon size={16} className="text-blue-600 dark:text-blue-400 animate-spin" />
-              ) : manual.status === 'completed' ? (
-                <FileTextIcon size={16} className="text-green-600 dark:text-green-400" />
-              ) : (
-                <FileTextIcon size={16} className="text-slate-600 dark:text-slate-400" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-base truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-slate-900 dark:text-white">
-                {manual.title}
-              </CardTitle>
-              <Badge variant={getStatusColor(manual.status).variant} className={`mt-1 text-xs ${getStatusColor(manual.status).badge.border} ${getStatusColor(manual.status).badge.text} ${getStatusColor(manual.status).badge.bg} ${getStatusColor(manual.status).badge.hover}`}>
-                {getStatusText(manual.status)}
-              </Badge>
+      {/* 本の背表紙風デザイン */}
+      <div className="absolute inset-0 bg-gradient-to-r from-amber-100/30 via-orange-50/20 to-amber-100/30 dark:from-amber-900/20 dark:via-orange-900/10 dark:to-amber-900/20"></div>
+      
+      {/* 本の端の影 */}
+      <div className="absolute right-0 top-0 w-1 h-full bg-gradient-to-b from-amber-600/20 via-orange-600/30 to-amber-700/20"></div>
+      <div className="absolute left-0 top-0 w-0.5 h-full bg-gradient-to-b from-amber-300/40 via-orange-400/50 to-amber-500/40"></div>
+      
+      {/* ページの端のテクスチャ */}
+      <div className="absolute top-0 right-1 w-0.5 h-full bg-gradient-to-b from-slate-200/60 via-slate-300/40 to-slate-200/60 dark:from-slate-600/40 dark:via-slate-500/30 dark:to-slate-600/40"></div>
+      
+      {/* しおり（本らしい色に変更） */}
+      <div className="absolute left-1 top-2 w-0.5 h-8 bg-gradient-to-b from-red-400 to-red-600 rounded-full shadow-sm"></div>
+      
+      <CardHeader className="pt-6 pb-4 relative z-10">
+        <div className="flex justify-end mb-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 rounded-full"
+            onClick={(e) => handleShowTorisetsuDeleteModal(torisetsu, e)}
+          >
+            <TrashIcon size={10} />
+          </Button>
+        </div>
+        
+        {/* 書籍タイトル風 */}
+        <div className="text-center space-y-4 px-2">
+          {/* 装飾的な線 */}
+          <div className="flex justify-center">
+            <div className="w-10 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+          </div>
+          
+          <div className="space-y-2 py-2">
+            <CardTitle className="text-sm font-bold leading-tight text-amber-900 dark:text-amber-100 group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors text-center tracking-wide">
+              {torisetsu.name}
+            </CardTitle>
+            <div className="text-xs text-amber-600 dark:text-amber-400 font-light">
+              トリセツ
             </div>
           </div>
-          {!isProcessing && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400"
-              onClick={(e) => handleShowManualDeleteModal(manual, e)}
-            >
-              <TrashIcon size={16} />
-            </Button>
-          )}
+          
+          {/* 装飾的な線 */}
+          <div className="flex justify-center">
+            <div className="w-8 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+          </div>
         </div>
       </CardHeader>
       
-      <CardContent className="pt-0">
-        <div className="flex items-center text-xs text-slate-500 dark:text-slate-500">
-          <div className="flex items-center space-x-1">
-            <CalendarIcon size={12} />
-            <span>
-              {new Date(manual.created_at).toLocaleDateString('ja-JP')}
-            </span>
+      {/* 中央部分のスペーサー */}
+      <div className="flex-1 relative z-10 flex items-center justify-center py-4">
+        <div className="w-12 h-12 rounded-full bg-amber-100/30 dark:bg-amber-800/30 flex items-center justify-center border border-amber-200/50 dark:border-amber-700/50">
+          <FileTextIcon size={20} className="text-amber-600 dark:text-amber-400" />
+        </div>
+      </div>
+      
+      <CardContent className="pt-2 pb-6 relative z-10 mt-auto">
+        <div className="space-y-3 text-center">
+          {/* 装飾的な線 */}
+          <div className="flex justify-center">
+            <div className="w-6 h-px bg-amber-300 dark:bg-amber-600"></div>
+          </div>
+          
+          {/* ページ数（本らしい表記） */}
+          <div className="text-xs text-amber-700 dark:text-amber-300 font-mono">
+            pp. {torisetsu.manual_count || 0}
+          </div>
+          
+          {/* 出版年風 */}
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-serif italic">
+            {new Date(torisetsu.created_at).getFullYear()}
+          </div>
+          
+          {/* 小さな装飾 */}
+          <div className="flex justify-center pt-2">
+            <div className="w-4 h-px bg-amber-300 dark:bg-amber-600"></div>
           </div>
         </div>
       </CardContent>
@@ -304,7 +255,6 @@ const ProjectDetail: React.FC = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-
         <div className="mb-8">
           {/* プロジェクト情報 */}
           <div className="flex items-center justify-between">
@@ -322,7 +272,7 @@ const ProjectDetail: React.FC = () => {
               </div>
             </div>
             <Button 
-              onClick={() => navigate('/upload', {
+              onClick={() => navigate('/torisetsu/create', {
                 state: {
                   projectId: id,
                   projectName: project?.name,
@@ -330,42 +280,25 @@ const ProjectDetail: React.FC = () => {
               })}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              <UploadIcon size={16} />
-              動画アップロード
+              <FileTextIcon size={16} />
+              トリセツを作成
             </Button>
           </div>
         </div>
 
-        {manuals.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {manuals.map((manual) => {
-              const isProcessing = manual.status === ManualStatus.PROCESSING;
-              
-              if (isProcessing) {
-                return (
-                  <div 
-                    key={manual.id} 
-                    className="group block cursor-not-allowed"
-                  >
-                    <Card className="h-full transition-all duration-200 border-0 bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl shadow-lg opacity-75 cursor-not-allowed">
-                      {renderManualCardContent(manual, true)}
-                    </Card>
-                  </div>
-                );
-              }
-              
-              return (
-                <Link 
-                  key={manual.id} 
-                  to={`/manual/${manual.id}`}
-                  className="group block"
-                >
-                  <Card className="h-full transition-all duration-200 border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl shadow-blue-500/10 hover:shadow-lg hover:-translate-y-1">
-                    {renderManualCardContent(manual, false)}
-                  </Card>
-                </Link>
-              );
-            })}
+        {torisetsuList.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {torisetsuList.map((torisetsu) => (
+              <Link 
+                key={torisetsu.id} 
+                to={`/torisetsu/${torisetsu.id}`}
+                className="group block"
+              >
+                <Card className="h-full min-h-[280px] transition-all duration-300 border-2 border-amber-300/40 dark:border-amber-600/40 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/30 dark:via-orange-900/20 dark:to-yellow-900/30 shadow-lg shadow-amber-800/20 hover:shadow-xl hover:shadow-amber-700/30 hover:-translate-y-1 hover:rotate-1 rounded-lg relative overflow-hidden backdrop-blur-sm flex flex-col">
+                  {renderTorisetsuCardContent(torisetsu)}
+                </Card>
+              </Link>
+            ))}
           </div>
         ) : (
           <Card className="border-2 border-dashed border-slate-300 dark:border-slate-600 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
@@ -373,12 +306,9 @@ const ProjectDetail: React.FC = () => {
               <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4">
                 <FileTextIcon size={32} className="text-slate-500 dark:text-slate-400" />
               </div>
-              <CardTitle className="mb-2 text-slate-900 dark:text-white">マニュアルがありません</CardTitle>
-              <CardDescription className="mb-6 max-w-md text-slate-600 dark:text-slate-400">
-                動画をアップロードしてマニュアルを作成しましょう
-              </CardDescription>
+              <CardTitle className="mb-2 text-slate-900 dark:text-white">トリセツがありません。</CardTitle>
               <Button 
-                onClick={() => navigate('/upload', {
+                onClick={() => navigate('/torisetsu/create', {
                   state: {
                     projectId: id,
                     projectName: project?.name,
@@ -386,16 +316,16 @@ const ProjectDetail: React.FC = () => {
                 })}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <UploadIcon size={16} />
-                動画アップロードから作成
+                <FileTextIcon size={16} />
+                トリセツを作成
               </Button>
             </CardContent>
           </Card>
         )}
       </main>
 
-      {/* Manual Delete Confirmation Modal */}
-      {showManualDeleteModal && manualToDelete && (
+      {/* Torisetsu Delete Confirmation Modal */}
+      {showTorisetsuDeleteModal && torisetsuToDelete && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10">
             <CardHeader>
@@ -403,26 +333,23 @@ const ProjectDetail: React.FC = () => {
                 <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                   <TrashIcon size={16} className="text-red-600 dark:text-red-400" />
                 </div>
-                <span>マニュアルを削除</span>
+                <span>トリセツを削除</span>
               </CardTitle>
               <CardDescription className="text-slate-600 dark:text-slate-400">
-                この操作は取り消すことができません。マニュアルの内容が完全に削除されます。
+                この操作は取り消すことができません。トリセツとその中のすべてのマニュアルが削除されます。
               </CardDescription>
             </CardHeader>
             
             <CardContent className="space-y-4">
               <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                 <p className="text-sm text-red-800 dark:text-red-300">
-                  <strong>削除されるマニュアル:</strong> {manualToDelete.title}
+                  <strong>削除されるトリセツ:</strong> {torisetsuToDelete.name}
                 </p>
                 <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                  <strong>ステータス:</strong> {getStatusText(manualToDelete.status as ManualStatus)}
+                  <strong>マニュアル数:</strong> {torisetsuToDelete.manual_count || 0}件
                 </p>
                 <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                  <strong>バージョン:</strong> v{manualToDelete.version}
-                </p>
-                <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                  <strong>作成日:</strong> {new Date(manualToDelete.created_at).toLocaleDateString('ja-JP')}
+                  <strong>作成日:</strong> {new Date(torisetsuToDelete.created_at).toLocaleDateString('ja-JP')}
                 </p>
               </div>
             </CardContent>
@@ -432,20 +359,20 @@ const ProjectDetail: React.FC = () => {
                 type="button" 
                 variant="outline"
                 onClick={() => {
-                  setShowManualDeleteModal(false);
-                  setManualToDelete(null);
+                  setShowTorisetsuDeleteModal(false);
+                  setTorisetsuToDelete(null);
                 }}
-                disabled={deletingManual}
+                disabled={deletingTorisetsu}
               >
                 キャンセル
               </Button>
               <Button 
-                onClick={handleDeleteManual}
-                disabled={deletingManual}
+                onClick={handleDeleteTorisetsu}
+                disabled={deletingTorisetsu}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
                 <TrashIcon size={16} />
-                {deletingManual ? '削除中...' : '削除する'}
+                {deletingTorisetsu ? '削除中...' : '削除する'}
               </Button>
             </CardContent>
           </Card>
@@ -479,7 +406,7 @@ const ProjectDetail: React.FC = () => {
                   </p>
                 )}
                 <p className="text-sm text-red-700 dark:text-red-400 mt-2">
-                  <strong>マニュアル数:</strong> {manuals.length}件
+                  <strong>トリセツ数:</strong> {torisetsuList.length}件
                 </p>
               </div>
             </CardContent>

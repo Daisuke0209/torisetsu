@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
 import client from '../api/client';
-import { Project } from '../types';
 import Button from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -15,53 +13,30 @@ import './ManualCreate.css';
 
 interface LocationState {
   videoPath?: string;
-  projectId?: string;
-  projectName?: string;
+  torisetsuId?: string;
+  torisetsuName?: string;
 }
 
 const ManualCreate: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>('');
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState;
 
+  // トリセツIDが渡されていない場合はエラー
   useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
-    // プロジェクト詳細画面から来た場合の初期設定
-    if (state?.projectId) {
-      setSelectedProject(state.projectId);
-    } else if (projects.length > 0 && !selectedProject) {
-      // デフォルトワークスペースを設定
-      setSelectedProject(projects[0].id);
+    if (!state?.torisetsuId) {
+      setError('トリセツが選択されていません');
     }
-  }, [state?.projectId, projects, selectedProject]);
-
-  const fetchProjects = async () => {
-    try {
-      const response = await client.get('/api/projects/');
-      setProjects(response.data);
-    } catch (error) {
-      console.error('Failed to fetch projects:', error);
-      setError('プロジェクトの取得に失敗しました');
-    }
-  };
+  }, [state?.torisetsuId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // プロジェクトIDの確認（事前選択または選択されたもの）
-    const projectId = state?.projectId || selectedProject;
-    
-    if (!projectId || !title) {
-      setError('プロジェクトとタイトルを入力してください');
+    if (!state?.torisetsuId || !title) {
+      setError('トリセツIDとタイトルを入力してください');
       return;
     }
 
@@ -70,7 +45,7 @@ const ManualCreate: React.FC = () => {
 
     try {
       const response = await client.post('/api/manuals', {
-        project_id: projectId,
+        torisetsu_id: state.torisetsuId,
         title,
         video_file_path: state?.videoPath || null,
         status: 'processing',
@@ -113,8 +88,8 @@ const ManualCreate: React.FC = () => {
         );
       }
 
-      // プロジェクト詳細画面に遷移（生成中状態をフラグで通知）
-      navigate(`/project/${projectId}`, { 
+      // トリセツ詳細画面に遷移（生成中状態をフラグで通知）
+      navigate(`/torisetsu/${state.torisetsuId}`, { 
         state: { 
           newManualCreated: true,
           manualId: response.data.id 
@@ -208,28 +183,6 @@ const ManualCreate: React.FC = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* プロジェクト選択 */}
-                {!state?.projectId && (
-                  <div className="space-y-2">
-                    <label htmlFor="project" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      プロジェクト <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="project"
-                      value={selectedProject}
-                      onChange={(e) => setSelectedProject(e.target.value)}
-                      required
-                      className="flex h-10 w-full rounded-md border border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-700/50 px-3 py-2 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 disabled:cursor-not-allowed disabled:opacity-50 text-slate-900 dark:text-white"
-                    >
-                      <option value="">プロジェクトを選択</option>
-                      {projects.map((project) => (
-                        <option key={project.id} value={project.id}>
-                          {project.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
 
                 {/* マニュアルタイトル */}
                 <div className="space-y-2">
@@ -258,7 +211,7 @@ const ManualCreate: React.FC = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate(state?.torisetsuId ? `/torisetsu/${state.torisetsuId}` : '/')}
                   >
                     キャンセル
                   </Button>

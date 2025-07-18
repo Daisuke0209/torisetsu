@@ -1,3 +1,3 @@
-from . import auth, projects, manuals, upload
+from . import auth, projects, manuals, upload, torisetsu
 
-__all__ = ["auth", "projects", "manuals", "upload"]
+__all__ = ["auth", "projects", "manuals", "upload", "torisetsu"]

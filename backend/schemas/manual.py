@@ -12,7 +12,7 @@ class ManualBase(BaseModel):
     version: str = "1.0"
 
 class ManualCreate(ManualBase):
-    project_id: str
+    torisetsu_id: str
     video_file_path: Optional[str] = None
     audio_file_path: Optional[str] = None
 
@@ -25,7 +25,7 @@ class ManualUpdate(BaseModel):
 
 class Manual(ManualBase):
     id: str
-    project_id: str
+    torisetsu_id: str
     video_file_path: Optional[str] = None
     audio_file_path: Optional[str] = None
     share_token: Optional[str] = None

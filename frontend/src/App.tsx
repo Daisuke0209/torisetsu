@@ -12,19 +12,25 @@ import SharedManualPlayback from './pages/SharedManualPlayback';
 import ScreenRecorder from './pages/ScreenRecorder';
 import VideoUpload from './pages/VideoUpload';
 import ManualCreate from './pages/ManualCreate';
+import TorisetsuDetail from './pages/TorisetsuDetail';
+import TorisetsuCreate from './pages/TorisetsuCreate';
 import { AuthProvider } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <LanguageProvider>
+        <Router>
         <div className="App">
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/project/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
+            <Route path="/torisetsu/create" element={<PrivateRoute><TorisetsuCreate /></PrivateRoute>} />
+            <Route path="/torisetsu/:id" element={<PrivateRoute><TorisetsuDetail /></PrivateRoute>} />
             <Route path="/manual/:id" element={<PrivateRoute><ManualEditor /></PrivateRoute>} />
             <Route path="/manual/:id/edit" element={<PrivateRoute><ManualEditor /></PrivateRoute>} />
             <Route path="/manual/:id/playback" element={<PrivateRoute><ManualPlayback /></PrivateRoute>} />
@@ -86,7 +92,8 @@ function App() {
             }}
           />
         </div>
-      </Router>
+        </Router>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

@@ -8,7 +8,7 @@ import secrets
 from datetime import datetime, timedelta
 
 from database import get_db
-from models import User, Manual, Project
+from models import User, Manual, Project, Torisetsu
 from schemas import ManualCreate, ManualUpdate, Manual as ManualSchema, ShareTokenRequest, ShareTokenResponse
 from routers.auth import get_current_user
 from services.gemini_service import gemini_service
@@ -17,12 +17,16 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-def check_project_access(project_id: str, user_id: str, db: Session) -> bool:
-    project = db.query(Project).filter(Project.id == project_id).first()
-    if not project:
+def check_torisetsu_access(torisetsu_id: str, user_id: str, db: Session) -> bool:
+    torisetsu = db.query(Torisetsu).filter(Torisetsu.id == torisetsu_id).first()
+    if not torisetsu:
         return False
     
     # プロジェクトの作成者かどうかをチェック
+    project = db.query(Project).filter(Project.id == torisetsu.project_id).first()
+    if not project:
+        return False
+    
     return project.creator_id == user_id
 
 @router.post("/", response_model=ManualSchema)
@@ -31,15 +35,15 @@ async def create_manual(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Session = Depends(get_db)
 ):
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(manual.project_id, current_user.id, db):
-        raise HTTPException(status_code=403, detail="Not authorized to create manual in this project")
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
+        raise HTTPException(status_code=403, detail="Not authorized to create manual in this torisetsu")
     
     # contentをJSON文字列に変換
     content_str = json.dumps(manual.content) if manual.content else None
     
     db_manual = Manual(
-        project_id=manual.project_id,
+        torisetsu_id=manual.torisetsu_id,
         title=manual.title,
         content=content_str,
         status=manual.status,
@@ -56,17 +60,17 @@ async def create_manual(
     
     return db_manual
 
-@router.get("/project/{project_id}", response_model=List[ManualSchema])
-async def list_manuals_by_project(
-    project_id: str,
+@router.get("/torisetsu/{torisetsu_id}", response_model=List[ManualSchema])
+async def list_manuals_by_torisetsu(
+    torisetsu_id: str,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Session = Depends(get_db)
 ):
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(project_id, current_user.id, db):
-        raise HTTPException(status_code=403, detail="Not authorized to access this project")
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(torisetsu_id, current_user.id, db):
+        raise HTTPException(status_code=403, detail="Not authorized to access this torisetsu")
     
-    manuals = db.query(Manual).filter(Manual.project_id == project_id).order_by(Manual.created_at.desc()).all()
+    manuals = db.query(Manual).filter(Manual.torisetsu_id == torisetsu_id).order_by(Manual.created_at.desc()).all()
     
     # contentをJSONに変換
     for manual in manuals:
@@ -85,8 +89,8 @@ async def get_manual_detail(
     if not manual:
         raise HTTPException(status_code=404, detail="Manual not found")
     
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(manual.project_id, current_user.id, db):
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
         raise HTTPException(status_code=403, detail="Not authorized to access this manual")
     
     # contentをJSONに変換
@@ -107,8 +111,8 @@ async def update_manual(
     if not manual:
         raise HTTPException(status_code=404, detail="Manual not found")
     
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(manual.project_id, current_user.id, db):
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
         raise HTTPException(status_code=403, detail="Not authorized to update this manual")
     
     update_data = manual_update.dict(exclude_unset=True)
@@ -139,14 +143,9 @@ async def delete_manual(
     if not manual:
         raise HTTPException(status_code=404, detail="Manual not found")
     
-    # プロジェクトへのアクセス権限チェック
-    project = db.query(Project).filter(Project.id == manual.project_id).first()
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    
-    # プロジェクトの作成者のみがマニュアルを削除できる
-    if project.creator_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only project creator can delete manuals")
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
+        raise HTTPException(status_code=403, detail="Not authorized to delete this manual")
     
     db.delete(manual)
     db.commit()
@@ -215,8 +214,8 @@ async def generate_manual_content(
     if not manual:
         raise HTTPException(status_code=404, detail="Manual not found")
     
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(manual.project_id, current_user.id, db):
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
         raise HTTPException(status_code=403, detail="Not authorized to generate content for this manual")
     
     if not manual.video_file_path:
@@ -258,8 +257,8 @@ async def enhance_manual_content(
     if not manual:
         raise HTTPException(status_code=404, detail="Manual not found")
     
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(manual.project_id, current_user.id, db):
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
         raise HTTPException(status_code=403, detail="Not authorized to enhance this manual")
     
     if not manual.content:
@@ -318,8 +317,8 @@ async def get_manual_status(
     if not manual:
         raise HTTPException(status_code=404, detail="Manual not found")
     
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(manual.project_id, current_user.id, db):
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
         raise HTTPException(status_code=403, detail="Not authorized to access this manual")
     
     return {
@@ -342,8 +341,8 @@ async def create_share_token(
     if not manual:
         raise HTTPException(status_code=404, detail="Manual not found")
     
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(manual.project_id, current_user.id, db):
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
         raise HTTPException(status_code=403, detail="Not authorized to share this manual")
     
     # Generate secure token
@@ -381,8 +380,8 @@ async def disable_share(
     if not manual:
         raise HTTPException(status_code=404, detail="Manual not found")
     
-    # プロジェクトへのアクセス権限チェック
-    if not check_project_access(manual.project_id, current_user.id, db):
+    # トリセツへのアクセス権限チェック
+    if not check_torisetsu_access(manual.torisetsu_id, current_user.id, db):
         raise HTTPException(status_code=403, detail="Not authorized to modify sharing for this manual")
     
     # Disable sharing

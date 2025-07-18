@@ -12,7 +12,7 @@ export interface Project {
   description?: string;
   created_at: string;
   updated_at: string;
-  manual_count?: number;
+  torisetsu_count?: number;
 }
 
 export enum ManualStatus {
@@ -24,9 +24,18 @@ export enum ManualStatus {
   FAILED = 'failed',
 }
 
-export interface Manual {
+export interface Torisetsu {
   id: string;
   project_id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  manual_count?: number;
+}
+
+export interface Manual {
+  id: string;
+  torisetsu_id: string;
   title: string;
   content?: any;
   status: ManualStatus;
