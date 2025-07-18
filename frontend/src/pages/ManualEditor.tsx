@@ -65,7 +65,6 @@ const ManualEditor: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState<ManualContent | null>(null);
   const [saving, setSaving] = useState(false);
-  const [currentVideoTime, setCurrentVideoTime] = useState(0);
   const [currentStepIndex, setCurrentStepIndex] = useState<number | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareLoading, setShareLoading] = useState(false);
@@ -668,7 +667,6 @@ const ManualEditor: React.FC = () => {
                       // 動画時間の更新を監視
                       ref.addEventListener('timeupdate', () => {
                         const currentTime = ref.currentTime;
-                        setCurrentVideoTime(currentTime);
                         
                         // 現在のステップを更新
                         const currentStep = getCurrentStep(currentTime);
@@ -690,30 +688,6 @@ const ManualEditor: React.FC = () => {
                   />
                   お使いのブラウザは動画再生に対応していません。
                 </video>
-                
-                
-                {/* 現在のステップ表示 */}
-                {manual.content && typeof manual.content === 'object' && currentStepIndex !== null && (
-                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">
-                        {currentStepIndex + 1}
-                      </div>
-                      <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                        現在のステップ
-                      </span>
-                      <span className="text-xs text-blue-600 dark:text-blue-400 font-mono">
-                        {formatSecondsToTime(currentVideoTime)}
-                      </span>
-                    </div>
-                    <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                      {(manual.content as ManualContent).steps[currentStepIndex]?.title?.replace(/^ステップ\d+:\s*/, '')}
-                    </h4>
-                    <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
-                      {(manual.content as ManualContent).steps[currentStepIndex]?.action}
-                    </p>
-                  </div>
-                )}
               </div>
             )}
             
