@@ -10,7 +10,11 @@ import {
   FileTextIcon,
   TrashIcon,
   FolderIcon,
-  PlusIcon
+  PlusIcon,
+  EditIcon,
+  SaveIcon,
+  XIcon,
+  LoaderIcon
 } from '../components/ui/Icons';
 import Header from '../components/ui/Header';
 
@@ -29,6 +33,9 @@ const ProjectDetail: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newTorisetsuName, setNewTorisetsuName] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingName, setEditingName] = useState('');
+  const [savingName, setSavingName] = useState(false);
 
   const fetchProjectData = async () => {
     try {
@@ -177,6 +184,38 @@ const ProjectDetail: React.FC = () => {
     }
   };
 
+  const handleEditName = () => {
+    if (project) {
+      setEditingName(project.name);
+      setIsEditingName(true);
+    }
+  };
+
+  const handleSaveName = async () => {
+    if (!project || !editingName.trim()) return;
+    
+    setSavingName(true);
+    try {
+      const response = await client.put(`/api/projects/${project.id}`, {
+        name: editingName.trim()
+      });
+      
+      setProject(response.data);
+      setIsEditingName(false);
+      toast.success('プロジェクト名を更新しました');
+    } catch (error: any) {
+      console.error('Failed to update project name:', error);
+      toast.error(error.response?.data?.detail || 'プロジェクト名の更新に失敗しました');
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingName(false);
+    setEditingName('');
+  };
+
   const renderTorisetsuCardContent = (torisetsu: Torisetsu) => (
     <>
       {/* 本の背表紙風デザイン */}
@@ -305,12 +344,55 @@ const ProjectDetail: React.FC = () => {
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center shadow-lg">
                 <FolderIcon size={24} className="text-blue-600 dark:text-blue-400" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{project.name}</h1>
-                {project.description && (
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {project.description}
-                  </p>
+              <div className="flex-1">
+                {isEditingName ? (
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      className="text-2xl font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                    />
+                    <Button
+                      onClick={handleSaveName}
+                      disabled={savingName || !editingName.trim()}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {savingName ? (
+                        <LoaderIcon size={16} className="animate-spin" />
+                      ) : (
+                        <SaveIcon size={16} />
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleCancelEdit}
+                      size="sm"
+                      variant="outline"
+                    >
+                      <XIcon size={16} />
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{project.name}</h1>
+                      <Button
+                        onClick={handleEditName}
+                        size="sm"
+                        variant="ghost"
+                        className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                      >
+                        <EditIcon size={16} />
+                      </Button>
+                    </div>
+                    {project.description && (
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {project.description}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
