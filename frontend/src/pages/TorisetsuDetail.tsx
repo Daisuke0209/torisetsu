@@ -8,6 +8,7 @@ import { Torisetsu, Manual, ManualStatus } from '../types';
 import Button from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/badge';
+import Input from '../components/ui/Input';
 import { 
   FileTextIcon,
   CalendarIcon,
@@ -18,7 +19,9 @@ import {
   ArrowLeftIcon,
   EditIcon,
   SaveIcon,
-  XIcon
+  XIcon,
+  CheckCircleIcon,
+  AlertCircleIcon
 } from '../components/ui/Icons';
 import Header from '../components/ui/Header';
 import { getStatusColor, getStatusText } from '../lib/status-colors';
@@ -26,14 +29,12 @@ import { getStatusColor, getStatusText } from '../lib/status-colors';
 const TorisetsuDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { t } = useLanguage();
+  const { } = useAuth();
+  const { } = useLanguage();
   const [torisetsu, setTorisetsu] = useState<Torisetsu | null>(null);
   const [manuals, setManuals] = useState<Manual[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [showManualDeleteModal, setShowManualDeleteModal] = useState(false);
   const [deletingManual, setDeletingManual] = useState(false);
   const [manualToDelete, setManualToDelete] = useState<Manual | null>(null);
@@ -41,8 +42,17 @@ const TorisetsuDetail: React.FC = () => {
   const [editingName, setEditingName] = useState('');
   const [savingName, setSavingName] = useState(false);
   const previousManualsRef = useRef<Manual[]>([]);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadedVideoPath, setUploadedVideoPath] = useState<string | null>(null);
+  const [manualTitle, setManualTitle] = useState('');
+  const [creatingManual, setCreatingManual] = useState(false);
 
-  const fetchTorisetsuData = async () => {
+  const fetchTorisetsuData = React.useCallback(async () => {
     try {
       // トリセツ情報を取得
       const torisetsuResponse = await client.get(`/api/torisetsu/detail/${id}`);
@@ -72,11 +82,11 @@ const TorisetsuDetail: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchTorisetsuData();
-  }, [id]);
+  }, [id, fetchTorisetsuData]);
 
   // ステータス変化を検知してトースト通知を表示
   useEffect(() => {
@@ -222,6 +232,165 @@ const TorisetsuDetail: React.FC = () => {
   const handleCancelEdit = () => {
     setIsEditingName(false);
     setEditingName('');
+  };
+
+  // Video upload functions
+  const ALLOWED_TYPES = ['video/mp4', 'video/webm', 'video/avi', 'video/mov'];
+  const MAX_SIZE = 100 * 1024 * 1024; // 100MB
+
+  const validateFile = (file: File): string | null => {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return 'サポートされていないファイル形式です。MP4、WebM、AVI、MOVのみ対応しています。';
+    }
+    if (file.size > MAX_SIZE) {
+      return `ファイルサイズが大きすぎます。最大${MAX_SIZE / 1024 / 1024}MBまでです。`;
+    }
+    return null;
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleFile(file);
+    }
+  };
+
+  const handleFile = (file: File) => {
+    setUploadError('');
+    
+    const validationError = validateFile(file);
+    if (validationError) {
+      setUploadError(validationError);
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    const videoFile = files.find(file => ALLOWED_TYPES.some(type => file.type === type));
+    
+    if (videoFile) {
+      handleFile(videoFile);
+    } else if (files.length > 0) {
+      setUploadError('サポートされていないファイル形式です。MP4、WebM、AVI、MOVのみ対応しています。');
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || !torisetsu) return;
+
+    setUploading(true);
+    setUploadError('');
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('torisetsu_id', torisetsu.id);
+
+      const response = await client.post('/api/upload/video', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(progress);
+          }
+        },
+      });
+
+      toast.success('動画をアップロードしました！', {
+        duration: 3000,
+        icon: '🎥',
+      });
+      
+      // アップロードした動画のパスを保存してタイトル入力画面へ
+      setUploadedVideoPath(response.data.file_path);
+      setSelectedFile(null);
+      setUploadProgress(0);
+    } catch (err: any) {
+      setUploadError(err.response?.data?.detail || 'アップロードに失敗しました');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const handleCreateManual = async () => {
+    if (!uploadedVideoPath || !manualTitle.trim() || !torisetsu) return;
+
+    setCreatingManual(true);
+    setUploadError('');
+
+    try {
+      // マニュアルを作成
+      const response = await client.post('/api/manuals', {
+        torisetsu_id: torisetsu.id,
+        title: manualTitle.trim(),
+        video_file_path: uploadedVideoPath,
+        status: 'processing',
+        version: '1.0'
+      });
+
+      // 自動生成を開始
+      try {
+        await client.post(`/api/manuals/${response.data.id}/generate`);
+        
+        toast.success(
+          `マニュアル「${manualTitle}」の生成を開始しました`,
+          {
+            duration: 4000,
+            icon: '🚀',
+          }
+        );
+      } catch (generateError) {
+        console.error('Failed to start manual generation:', generateError);
+        
+        toast.error(
+          'マニュアルの自動生成開始に失敗しました。手動で生成してください。',
+          {
+            duration: 5000,
+            icon: '⚠️',
+          }
+        );
+      }
+
+      // モーダルを閉じて画面を更新
+      setShowUploadModal(false);
+      setUploadedVideoPath(null);
+      setManualTitle('');
+      setUploadError('');
+      
+      // マニュアル一覧を更新
+      fetchTorisetsuData();
+    } catch (err: any) {
+      setUploadError(err.response?.data?.detail || 'マニュアルの作成に失敗しました');
+    } finally {
+      setCreatingManual(false);
+    }
   };
 
   const renderManualCardContent = (manual: Manual, isProcessing: boolean) => (
@@ -389,12 +558,7 @@ const TorisetsuDetail: React.FC = () => {
               </div>
             </div>
             <Button 
-              onClick={() => navigate('/upload', {
-                state: {
-                  torisetsuId: id,
-                  torisetsuName: torisetsu?.name,
-                }
-              })}
+              onClick={() => setShowUploadModal(true)}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <UploadIcon size={16} />
@@ -445,12 +609,7 @@ const TorisetsuDetail: React.FC = () => {
                 動画をアップロードしてマニュアルを作成しましょう
               </CardDescription>
               <Button 
-                onClick={() => navigate('/upload', {
-                  state: {
-                    torisetsuId: id,
-                    torisetsuName: torisetsu?.name,
-                  }
-                })}
+                onClick={() => setShowUploadModal(true)}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <UploadIcon size={16} />
@@ -514,6 +673,239 @@ const TorisetsuDetail: React.FC = () => {
                 <TrashIcon size={16} />
                 {deletingManual ? '削除中...' : '削除する'}
               </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Video Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-slate-900 dark:text-white">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center">
+                  {uploadedVideoPath ? <FileTextIcon size={16} className="text-blue-600 dark:text-blue-400" /> : <UploadIcon size={16} className="text-blue-600 dark:text-blue-400" />}
+                </div>
+                <span>{uploadedVideoPath ? 'マニュアル作成' : '動画アップロード'}</span>
+              </CardTitle>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              {!uploadedVideoPath ? (
+                <>
+              {/* ドラッグ&ドロップエリア */}
+              <div
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
+                  isDragOver 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                    : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <input
+                  id="file-input"
+                  type="file"
+                  accept="video/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                
+                {selectedFile ? (
+                  <div className="space-y-2">
+                    <div className="h-12 w-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto">
+                      <CheckCircleIcon size={24} className="text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <p className="font-medium text-slate-900 dark:text-white">{selectedFile.name}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {formatFileSize(selectedFile.size)}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        const fileInput = document.getElementById('file-input') as HTMLInputElement;
+                        if (fileInput) fileInput.value = '';
+                      }}
+                    >
+                      別のファイルを選択
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <UploadIcon size={48} className="mx-auto text-slate-400 dark:text-slate-500 mb-4" />
+                    <p className="font-medium text-slate-900 dark:text-white mb-2">
+                      動画ファイルをドラッグ&ドロップ
+                    </p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                      または
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => document.getElementById('file-input')?.click()}
+                    >
+                      ファイルを選択
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {/* エラー表示 */}
+              {uploadError && (
+                <div className="flex items-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <AlertCircleIcon size={20} className="text-red-600 dark:text-red-400" />
+                  <p className="text-sm text-red-800 dark:text-red-300">{uploadError}</p>
+                </div>
+              )}
+
+              {/* プログレスバー */}
+              {uploading && (
+                <div className="space-y-2">
+                  <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-center text-slate-600 dark:text-slate-400">
+                    アップロード中... {uploadProgress}%
+                  </p>
+                </div>
+              )}
+
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                <p>• 対応形式: MP4, WebM, AVI, MOV</p>
+                <p>• 最大サイズ: 100MB</p>
+              </div>
+                </>
+              ) : (
+                <>
+                  {/* マニュアル作成フォーム */}
+                  <div className="space-y-4">
+                    {/* 動画プレビュー */}
+                    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700/50">
+                      <CardContent className="p-4 space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                            <CheckCircleIcon size={20} className="text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">動画アップロード完了</p>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">{uploadedVideoPath?.split('/').pop()}</p>
+                          </div>
+                        </div>
+                        
+                        {/* 動画プレイヤー */}
+                        <div className="relative group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="relative">
+                            <video 
+                              className="w-full h-80 object-cover rounded-xl border-2 border-white/50 dark:border-slate-700/50 shadow-xl"
+                              preload="metadata"
+                              controls
+                              muted
+                            >
+                              <source 
+                                src={`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/uploads/${uploadedVideoPath?.split('/').pop()}#t=1`} 
+                                type="video/mp4" 
+                              />
+                              動画を再生できません
+                            </video>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* タイトル入力 */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        マニュアルタイトル <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        value={manualTitle}
+                        onChange={(e) => setManualTitle(e.target.value)}
+                        placeholder="例: ユーザー登録機能の操作マニュアル"
+                        required
+                        className="bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                      />
+                    </div>
+
+                    {/* エラー表示 */}
+                    {uploadError && (
+                      <div className="flex items-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <AlertCircleIcon size={20} className="text-red-600 dark:text-red-400" />
+                        <p className="text-sm text-red-800 dark:text-red-300">{uploadError}</p>
+                      </div>
+                    )}
+
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
+                      <p className="text-sm text-blue-800 dark:text-blue-300">
+                        マニュアル作成を開始すると、AIが動画内容を分析して自動的にステップバイステップのマニュアルを生成します。
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+            
+            <CardContent className="flex justify-end space-x-2 pt-0">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setSelectedFile(null);
+                  setUploadError('');
+                  setUploadedVideoPath(null);
+                  setManualTitle('');
+                  const fileInput = document.getElementById('file-input') as HTMLInputElement;
+                  if (fileInput) fileInput.value = '';
+                }}
+                disabled={uploading || creatingManual}
+              >
+                キャンセル
+              </Button>
+              {!uploadedVideoPath ? (
+                <Button 
+                  onClick={handleUpload}
+                  disabled={!selectedFile || uploading}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploading ? (
+                    <>
+                      <LoaderIcon size={16} className="animate-spin" />
+                      アップロード中...
+                    </>
+                  ) : (
+                    <>
+                      <UploadIcon size={16} />
+                      アップロード
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleCreateManual}
+                  disabled={!manualTitle.trim() || creatingManual}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {creatingManual ? (
+                    <>
+                      <LoaderIcon size={16} className="animate-spin" />
+                      作成中...
+                    </>
+                  ) : (
+                    <>
+                      <FileTextIcon size={16} />
+                      マニュアル作成
+                    </>
+                  )}
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>

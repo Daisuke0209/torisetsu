@@ -5,10 +5,12 @@ import client from '../api/client';
 import { Project, Torisetsu } from '../types';
 import Button from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
+import Input from '../components/ui/Input';
 import { 
   FileTextIcon,
   TrashIcon,
-  FolderIcon
+  FolderIcon,
+  PlusIcon
 } from '../components/ui/Icons';
 import Header from '../components/ui/Header';
 
@@ -24,6 +26,9 @@ const ProjectDetail: React.FC = () => {
   const [showTorisetsuDeleteModal, setShowTorisetsuDeleteModal] = useState(false);
   const [deletingTorisetsu, setDeletingTorisetsu] = useState(false);
   const [torisetsuToDelete, setTorisetsuToDelete] = useState<Torisetsu | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newTorisetsuName, setNewTorisetsuName] = useState('');
 
   const fetchProjectData = async () => {
     try {
@@ -132,6 +137,44 @@ const ProjectDetail: React.FC = () => {
     e.stopPropagation();
     setTorisetsuToDelete(torisetsu);
     setShowTorisetsuDeleteModal(true);
+  };
+
+  const handleCreateTorisetsu = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (creating) return;
+    
+    setCreating(true);
+    try {
+      if (!newTorisetsuName.trim()) {
+        toast.error('トリセツ名を入力してください');
+        return;
+      }
+      
+      const response = await client.post('/api/torisetsu/', {
+        name: newTorisetsuName,
+        project_id: id,
+      });
+      
+      setShowCreateModal(false);
+      setNewTorisetsuName('');
+      await fetchProjectData();
+      
+      toast.success(`トリセツ「${newTorisetsuName}」を作成しました`, {
+        duration: 3000,
+        icon: '📖',
+      });
+    } catch (error: any) {
+      console.error('トリセツ作成エラー:', error);
+      toast.error(
+        error.response?.data?.detail || 'トリセツの作成に失敗しました',
+        {
+          duration: 4000,
+          icon: '❌',
+        }
+      );
+    } finally {
+      setCreating(false);
+    }
   };
 
   const renderTorisetsuCardContent = (torisetsu: Torisetsu) => (
@@ -272,15 +315,10 @@ const ProjectDetail: React.FC = () => {
               </div>
             </div>
             <Button 
-              onClick={() => navigate('/torisetsu/create', {
-                state: {
-                  projectId: id,
-                  projectName: project?.name,
-                }
-              })}
+              onClick={() => setShowCreateModal(true)}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              <FileTextIcon size={16} />
+              <PlusIcon size={16} />
               トリセツを作成
             </Button>
           </div>
@@ -308,15 +346,10 @@ const ProjectDetail: React.FC = () => {
               </div>
               <CardTitle className="mb-2 text-slate-900 dark:text-white">トリセツがありません。</CardTitle>
               <Button 
-                onClick={() => navigate('/torisetsu/create', {
-                  state: {
-                    projectId: id,
-                    projectName: project?.name,
-                  }
-                })}
+                onClick={() => setShowCreateModal(true)}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <FileTextIcon size={16} />
+                <PlusIcon size={16} />
                 トリセツを作成
               </Button>
             </CardContent>
@@ -429,6 +462,62 @@ const ProjectDetail: React.FC = () => {
                 {deleting ? '削除中...' : '削除する'}
               </Button>
             </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Create Torisetsu Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-slate-900 dark:text-white">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center">
+                  <PlusIcon size={16} className="text-amber-600 dark:text-amber-400" />
+                </div>
+                <span>新規トリセツ作成</span>
+              </CardTitle>
+            </CardHeader>
+            
+            <form onSubmit={handleCreateTorisetsu}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    トリセツ名 <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={newTorisetsuName}
+                    onChange={(e) => setNewTorisetsuName(e.target.value)}
+                    placeholder="トリセツ名を入力"
+                    required
+                    className="bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
+                  />
+                </div>
+              </CardContent>
+              
+              <CardContent className="flex justify-end space-x-2 pt-0">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setNewTorisetsuName('');
+                  }}
+                  disabled={creating}
+                >
+                  キャンセル
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={creating || !newTorisetsuName.trim()}
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <PlusIcon size={16} />
+                  {creating ? '作成中...' : 'トリセツを作成'}
+                </Button>
+              </CardContent>
+            </form>
           </Card>
         </div>
       )}
