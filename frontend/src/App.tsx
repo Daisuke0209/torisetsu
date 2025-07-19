@@ -10,10 +10,7 @@ import ManualEditor from './pages/ManualEditor';
 import ManualPlayback from './pages/ManualPlayback';
 import SharedManualPlayback from './pages/SharedManualPlayback';
 import ScreenRecorder from './pages/ScreenRecorder';
-import VideoUpload from './pages/VideoUpload';
-import ManualCreate from './pages/ManualCreate';
 import TorisetsuDetail from './pages/TorisetsuDetail';
-import TorisetsuCreate from './pages/TorisetsuCreate';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import PrivateRoute from './components/PrivateRoute';
@@ -29,15 +26,12 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/project/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
-            <Route path="/torisetsu/create" element={<PrivateRoute><TorisetsuCreate /></PrivateRoute>} />
             <Route path="/torisetsu/:id" element={<PrivateRoute><TorisetsuDetail /></PrivateRoute>} />
             <Route path="/manual/:id" element={<PrivateRoute><ManualEditor /></PrivateRoute>} />
             <Route path="/manual/:id/edit" element={<PrivateRoute><ManualEditor /></PrivateRoute>} />
             <Route path="/manual/:id/playback" element={<PrivateRoute><ManualPlayback /></PrivateRoute>} />
             <Route path="/share/:shareToken" element={<SharedManualPlayback />} />
             <Route path="/record" element={<PrivateRoute><ScreenRecorder /></PrivateRoute>} />
-            <Route path="/upload" element={<PrivateRoute><VideoUpload /></PrivateRoute>} />
-            <Route path="/manual/create" element={<PrivateRoute><ManualCreate /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
           
