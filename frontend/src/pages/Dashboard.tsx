@@ -90,7 +90,7 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20">
       <Header />
 
       {/* Modern Content Area */}
@@ -98,7 +98,7 @@ const Dashboard: React.FC = () => {
         <div className="mb-8 flex justify-end">
           <Button 
             onClick={() => setShowCreateModal(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
           >
             <PlusIcon size={16} />
             プロジェクトを作成
@@ -113,14 +113,14 @@ const Dashboard: React.FC = () => {
                 to={`/project/${project.id}`}
                 className="group block"
               >
-                <Card className="h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1 border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl shadow-blue-500/10">
+                <Card className="h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1 border-0 bg-white/70 dark:bg-amber-800/70 backdrop-blur-xl shadow-xl shadow-amber-500/10">
                   <CardHeader className="pb-3">
                     <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center">
-                        <FolderIcon size={20} className="text-blue-600 dark:text-blue-400" />
+                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center">
+                        <FolderIcon size={20} className="text-amber-600 dark:text-amber-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-slate-900 dark:text-white">
+                        <CardTitle className="text-lg truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors text-slate-900 dark:text-white">
                           {project.name}
                         </CardTitle>
                       </div>
@@ -143,7 +143,7 @@ const Dashboard: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         {project.torisetsu_count !== undefined && project.torisetsu_count !== null && (
-                          <Badge variant="outline" className="text-xs border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20">
+                          <Badge variant="outline" className="text-xs border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20">
                             {project.torisetsu_count}件
                           </Badge>
                         )}
@@ -158,10 +158,10 @@ const Dashboard: React.FC = () => {
             ))}
           </div>
         ) : (
-          <Card className="border-2 border-dashed border-slate-300 dark:border-slate-600 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+          <Card className="border-2 border-dashed border-amber-300 dark:border-amber-600 bg-white/50 dark:bg-amber-800/50 backdrop-blur-sm">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4">
-                <FolderIcon size={32} className="text-slate-500 dark:text-slate-400" />
+              <div className="h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-700 flex items-center justify-center mb-4">
+                <FolderIcon size={32} className="text-amber-600 dark:text-amber-400" />
               </div>
               <CardTitle className="mb-2 text-slate-900 dark:text-white">プロジェクトがありません</CardTitle>
               <CardDescription className="mb-6 max-w-md text-slate-600 dark:text-slate-400">
@@ -169,7 +169,7 @@ const Dashboard: React.FC = () => {
               </CardDescription>
               <Button 
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <PlusIcon size={16} />
                 プロジェクトを作成
@@ -182,7 +182,7 @@ const Dashboard: React.FC = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && projectToDelete && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10">
+          <Card className="w-full max-w-md bg-white/95 dark:bg-amber-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-amber-500/10">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-red-600 dark:text-red-400">
                 <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -236,11 +236,11 @@ const Dashboard: React.FC = () => {
       {/* Create Project Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10" onClick={(e) => e.stopPropagation()}>
+          <Card className="w-full max-w-md bg-white/95 dark:bg-amber-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-amber-500/10" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-slate-900 dark:text-white">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center">
-                  <PlusIcon size={16} className="text-blue-600 dark:text-blue-400" />
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center">
+                  <PlusIcon size={16} className="text-amber-600 dark:text-amber-400" />
                 </div>
                 <span>新規プロジェクト作成</span>
               </CardTitle>
@@ -258,7 +258,7 @@ const Dashboard: React.FC = () => {
                     onChange={(e) => setNewProjectName(e.target.value)}
                     placeholder="プロジェクト名を入力"
                     required
-                    className="bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                    className="bg-white/50 dark:bg-amber-700/50 border-amber-200 dark:border-amber-600 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                   />
                 </div>
                 
@@ -275,7 +275,7 @@ const Dashboard: React.FC = () => {
                 <Button 
                   type="submit" 
                   disabled={creating || !newProjectName.trim()}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PlusIcon size={16} />
                   {creating ? '作成中...' : 'プロジェクトを作成'}

@@ -391,7 +391,7 @@ const ManualEditor: React.FC = () => {
                     size="sm"
                     onClick={handleSaveEdit}
                     disabled={saving}
-                    className="text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                    className="text-xs bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
                   >
                     <SaveIcon size={14} />
                     {saving ? '保存中...' : '保存'}
@@ -405,7 +405,7 @@ const ManualEditor: React.FC = () => {
             {currentContent.steps.map((step, index) => (
               <div key={index} className={`flex items-start space-x-3 p-3 rounded-lg border transition-colors group ${
                 currentStepIndex === index 
-                  ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20' 
+                  ? 'border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20' 
                   : 'border-border bg-card hover:bg-muted/50'
               }`}>
                 <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold mt-0.5">
@@ -419,13 +419,13 @@ const ManualEditor: React.FC = () => {
                           type="text"
                           value={step.title.replace(/^ステップ\d+:\s*/, '')}
                           onChange={(e) => handleStepChange(index, 'title', e.target.value)}
-                          className="text-sm font-medium bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 w-full"
+                          className="text-sm font-medium bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20 w-full"
                           placeholder="ステップのタイトル"
                         />
                         <textarea
                           value={step.action}
                           onChange={(e) => handleStepChange(index, 'action', e.target.value)}
-                          className="w-full min-h-[60px] text-sm bg-white/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 resize-none text-slate-900 dark:text-white"
+                          className="w-full min-h-[60px] text-sm bg-white/50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20 resize-none text-slate-900 dark:text-white"
                           placeholder="操作の説明"
                           rows={3}
                         />
@@ -448,14 +448,14 @@ const ManualEditor: React.FC = () => {
                             >
                               {/* プログレスバー */}
                               <div 
-                                className="absolute top-0 left-0 h-full bg-blue-500 rounded-full transition-all duration-150"
+                                className="absolute top-0 left-0 h-full bg-amber-500 rounded-full transition-all duration-150"
                                 style={{ 
                                   width: `${(parseTimeToSeconds(step.time || '0:00') / (videoDuration || 100)) * 100}%` 
                                 }}
                               />
                               {/* スライダーハンドル */}
                               <div
-                                className="absolute top-1/2 w-4 h-4 bg-blue-600 border-2 border-white rounded-full cursor-grab active:cursor-grabbing transform -translate-y-1/2 shadow-lg hover:scale-110 transition-transform duration-150"
+                                className="absolute top-1/2 w-4 h-4 bg-amber-600 border-2 border-white rounded-full cursor-grab active:cursor-grabbing transform -translate-y-1/2 shadow-lg hover:scale-110 transition-transform duration-150"
                                 style={{ 
                                   left: `calc(${(parseTimeToSeconds(step.time || '0:00') / (videoDuration || 100)) * 100}% - 8px)` 
                                 }}
@@ -522,7 +522,7 @@ const ManualEditor: React.FC = () => {
                         </h4>
                         <div className="flex items-center space-x-2">
                           {currentStepIndex === index && (
-                            <span className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full border border-blue-200 dark:border-blue-700">
+                            <span className="flex items-center space-x-1 px-2 py-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-full border border-amber-200 dark:border-amber-700">
                               <svg className="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
                                 <circle cx="10" cy="10" r="3" />
                               </svg>
@@ -533,7 +533,7 @@ const ManualEditor: React.FC = () => {
                             <>
                               <button
                                 onClick={() => handleTimeClick(step.time!)}
-                                className="flex items-center space-x-1 px-2 py-1 text-xs font-mono text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded cursor-pointer transition-colors flex-shrink-0"
+                                className="flex items-center space-x-1 px-2 py-1 text-xs font-mono text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded cursor-pointer transition-colors flex-shrink-0"
                               >
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
@@ -581,7 +581,7 @@ const ManualEditor: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <Header title={manual.title} onLogoClick={() => navigate('/')} />
 
       <main className="container mx-auto px-4 py-8">
@@ -602,7 +602,7 @@ const ManualEditor: React.FC = () => {
               <div className={`h-12 w-12 rounded-xl flex items-center justify-center shadow-lg ${getStatusColor(manual.status).container}`}>
                 <FileTextIcon size={24} className={
                   manual.status === ManualStatus.PROCESSING 
-                    ? 'text-blue-600 dark:text-blue-400'
+                    ? 'text-amber-600 dark:text-amber-400'
                     : manual.status === ManualStatus.COMPLETED
                     ? 'text-green-600 dark:text-green-400'
                     : 'text-slate-600 dark:text-slate-400'
@@ -620,7 +620,7 @@ const ManualEditor: React.FC = () => {
                   disabled={shareLoading}
                   variant="outline"
                   size="sm"
-                  className="flex items-center space-x-1 border-blue-600 text-blue-600 hover:bg-blue-50 text-xs"
+                  className="flex items-center space-x-1 border-amber-600 text-amber-600 hover:bg-amber-50 text-xs"
                 >
                   <ShareIcon size={14} />
                   <span>{shareLoading ? '作成中...' : '共有URL作成'}</span>
@@ -693,7 +693,7 @@ const ManualEditor: React.FC = () => {
             
 
             {manual.status === ManualStatus.DRAFT && manual.video_file_path && (
-              <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-blue-500/10">
+              <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-amber-500/10">
                 <CardHeader>
                   <CardTitle className="text-slate-900 dark:text-white">マニュアル生成</CardTitle>
                   <CardDescription className="text-slate-600 dark:text-slate-400">
@@ -704,7 +704,7 @@ const ManualEditor: React.FC = () => {
                   <Button
                     onClick={handleGenerateManual}
                     disabled={generating}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     {generating ? '生成中...' : 'マニュアルを生成'}
                   </Button>
@@ -713,20 +713,20 @@ const ManualEditor: React.FC = () => {
             )}
 
             {manual.status === ManualStatus.PROCESSING && (
-              <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-blue-500/10">
+              <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-amber-500/10">
                 <CardContent className="pt-6">
                   <div className="flex flex-col items-center justify-center py-12">
-                    <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4 animate-pulse">
-                      <ClockIcon size={32} className="text-blue-600 dark:text-blue-400" />
+                    <div className="h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4 animate-pulse">
+                      <ClockIcon size={32} className="text-amber-600 dark:text-amber-400" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">生成中</h3>
                     <p className="text-slate-600 dark:text-slate-400 text-center">
                       AIがマニュアルを生成しています。しばらくお待ちください...
                     </p>
                     <div className="mt-4 flex space-x-1">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
                   </div>
                 </CardContent>
@@ -762,7 +762,7 @@ const ManualEditor: React.FC = () => {
           {/* 右側: マニュアル内容 */}
           <div className="space-y-6">
             {manual.status === 'completed' && manual.content && (
-              <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-blue-500/10">
+              <Card className="border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-amber-500/10">
                 <CardContent className="pt-6">
                   {typeof manual.content === 'object' ? 
                     renderManualContent(manual.content) : 

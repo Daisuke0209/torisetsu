@@ -414,7 +414,7 @@ const TorisetsuDetail: React.FC = () => {
           <div className="flex items-center space-x-3 flex-1 min-w-0">
             <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${getStatusColor(manual.status).container}`}>
               {manual.status === ManualStatus.PROCESSING ? (
-                <LoaderIcon size={16} className="text-blue-600 dark:text-blue-400 animate-spin" />
+                <LoaderIcon size={16} className="text-amber-600 dark:text-amber-400 animate-spin" />
               ) : manual.status === 'completed' ? (
                 <FileTextIcon size={16} className="text-green-600 dark:text-green-400" />
               ) : (
@@ -422,7 +422,7 @@ const TorisetsuDetail: React.FC = () => {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-base truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-slate-900 dark:text-white">
+              <CardTitle className="text-base truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors text-slate-900 dark:text-white">
                 {manual.title}
               </CardTitle>
               <Badge variant={getStatusColor(manual.status).variant} className={`mt-1 text-xs ${getStatusColor(manual.status).badge.border} ${getStatusColor(manual.status).badge.text} ${getStatusColor(manual.status).badge.bg} ${getStatusColor(manual.status).badge.hover}`}>
@@ -462,8 +462,8 @@ const TorisetsuDetail: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
-        <Card className="w-full max-w-md bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-blue-500/10 border-0">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+        <Card className="w-full max-w-md bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-amber-500/10 border-0">
           <CardHeader>
             <CardTitle className="text-red-600 dark:text-red-400">エラー</CardTitle>
           </CardHeader>
@@ -473,7 +473,7 @@ const TorisetsuDetail: React.FC = () => {
               <Button variant="outline" onClick={() => navigate(-1)} className="border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300">
                 戻る
               </Button>
-              <Button onClick={() => window.location.reload()} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+              <Button onClick={() => window.location.reload()} className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white">
                 再読み込み
               </Button>
             </div>
@@ -488,7 +488,7 @@ const TorisetsuDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <Header onLogoClick={() => navigate('/')} />
 
       {/* Main Content */}
@@ -519,7 +519,7 @@ const TorisetsuDetail: React.FC = () => {
                       type="text"
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
-                      className="text-2xl font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="text-2xl font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                       autoFocus
                     />
                     <Button
@@ -559,7 +559,7 @@ const TorisetsuDetail: React.FC = () => {
             </div>
             <Button 
               onClick={() => setShowUploadModal(true)}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <UploadIcon size={16} />
               動画アップロード
@@ -591,7 +591,7 @@ const TorisetsuDetail: React.FC = () => {
                   to={`/manual/${manual.id}`}
                   className="group block"
                 >
-                  <Card className="h-full transition-all duration-200 border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl shadow-blue-500/10 hover:shadow-lg hover:-translate-y-1">
+                  <Card className="h-full transition-all duration-200 border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-xl shadow-amber-500/10 hover:shadow-lg hover:-translate-y-1">
                     {renderManualCardContent(manual, false)}
                   </Card>
                 </Link>
@@ -610,7 +610,7 @@ const TorisetsuDetail: React.FC = () => {
               </CardDescription>
               <Button 
                 onClick={() => setShowUploadModal(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <UploadIcon size={16} />
                 動画アップロードから作成
@@ -623,7 +623,7 @@ const TorisetsuDetail: React.FC = () => {
       {/* Manual Delete Confirmation Modal */}
       {showManualDeleteModal && manualToDelete && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10">
+          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-amber-500/10">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-red-600 dark:text-red-400">
                 <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -681,11 +681,11 @@ const TorisetsuDetail: React.FC = () => {
       {/* Video Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10" onClick={(e) => e.stopPropagation()}>
+          <Card className="w-full max-w-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-amber-500/10" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-slate-900 dark:text-white">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center">
-                  {uploadedVideoPath ? <FileTextIcon size={16} className="text-blue-600 dark:text-blue-400" /> : <UploadIcon size={16} className="text-blue-600 dark:text-blue-400" />}
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center">
+                  {uploadedVideoPath ? <FileTextIcon size={16} className="text-amber-600 dark:text-amber-400" /> : <UploadIcon size={16} className="text-amber-600 dark:text-amber-400" />}
                 </div>
                 <span>{uploadedVideoPath ? 'マニュアル作成' : '動画アップロード'}</span>
               </CardTitle>
@@ -698,8 +698,8 @@ const TorisetsuDetail: React.FC = () => {
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
                   isDragOver 
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                    : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
+                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20' 
+                    : 'border-slate-300 dark:border-slate-600 hover:border-amber-400 dark:hover:border-amber-500'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -715,8 +715,8 @@ const TorisetsuDetail: React.FC = () => {
                 
                 {selectedFile ? (
                   <div className="space-y-2">
-                    <div className="h-12 w-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto">
-                      <CheckCircleIcon size={24} className="text-blue-600 dark:text-blue-400" />
+                    <div className="h-12 w-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto">
+                      <CheckCircleIcon size={24} className="text-amber-600 dark:text-amber-400" />
                     </div>
                     <p className="font-medium text-slate-900 dark:text-white">{selectedFile.name}</p>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -766,7 +766,7 @@ const TorisetsuDetail: React.FC = () => {
                 <div className="space-y-2">
                   <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      className="bg-amber-600 h-2 rounded-full transition-all duration-300" 
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
@@ -786,10 +786,10 @@ const TorisetsuDetail: React.FC = () => {
                   {/* マニュアル作成フォーム */}
                   <div className="space-y-4">
                     {/* 動画プレビュー */}
-                    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700/50">
+                    <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-700/50">
                       <CardContent className="p-4 space-y-4">
                         <div className="flex items-center space-x-3">
-                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
                             <CheckCircleIcon size={20} className="text-white" />
                           </div>
                           <div>
@@ -800,7 +800,7 @@ const TorisetsuDetail: React.FC = () => {
                         
                         {/* 動画プレイヤー */}
                         <div className="relative group">
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
                           <div className="relative">
                             <video 
                               className="w-full h-80 object-cover rounded-xl border-2 border-white/50 dark:border-slate-700/50 shadow-xl"
@@ -830,7 +830,7 @@ const TorisetsuDetail: React.FC = () => {
                         onChange={(e) => setManualTitle(e.target.value)}
                         placeholder="例: ユーザー登録機能の操作マニュアル"
                         required
-                        className="bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
+                        className="bg-white/50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 focus:outline-none focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                       />
                     </div>
 
@@ -842,8 +842,8 @@ const TorisetsuDetail: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
-                      <p className="text-sm text-blue-800 dark:text-blue-300">
+                    <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50">
+                      <p className="text-sm text-amber-800 dark:text-amber-300">
                         マニュアル作成を開始すると、AIが動画内容を分析して自動的にステップバイステップのマニュアルを生成します。
                       </p>
                     </div>
@@ -873,7 +873,7 @@ const TorisetsuDetail: React.FC = () => {
                 <Button 
                   onClick={handleUpload}
                   disabled={!selectedFile || uploading}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {uploading ? (
                     <>
@@ -891,7 +891,7 @@ const TorisetsuDetail: React.FC = () => {
                 <Button 
                   onClick={handleCreateManual}
                   disabled={!manualTitle.trim() || creatingManual}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {creatingManual ? (
                     <>
