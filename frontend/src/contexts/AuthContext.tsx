@@ -1,12 +1,13 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import client from '../api/client';
 import { User } from '../types';
+import { clearAuthData } from '../utils/auth';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, username: string, password: string) => Promise<void>;
+  login: () => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -26,6 +27,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const { user: firebaseUser, loading: firebaseLoading, signInWithGoogle, signOut } = useFirebaseAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +35,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) {
       setUser(null);
-      setLoading(false);
       return;
     }
 
@@ -51,95 +52,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      setLoading(true);
-      await refreshUser();
-      setLoading(false);
-    };
+    // Firebaseユーザーの状態が変更されたら、内部ユーザー情報を更新
+    if (firebaseUser && firebaseUser.token) {
+      refreshUser();
+    } else if (!firebaseLoading && !firebaseUser) {
+      // ユーザーがいない場合は、古いトークンとユーザー情報をクリア
+      clearAuthData();
+      setUser(null);
+    }
+    setLoading(firebaseLoading);
+  }, [firebaseUser, firebaseLoading]);
 
-    initializeAuth();
-  }, []);
-
-  const login = async (email: string, password: string) => {
+  const login = async () => {
     try {
-      // FormDataを使ってOAuth2形式でリクエスト
-      const formData = new FormData();
-      formData.append('username', email);
-      formData.append('password', password);
-
-      const response = await client.post('/api/auth/token', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      const { access_token } = response.data;
-      
-      // トークンを保存
-      localStorage.setItem('token', access_token);
-
-      // ユーザー情報を取得
-      await refreshUser();
+      await signInWithGoogle();
+      // useFirebaseAuth フックが自動的にトークンを取得し、
+      // useEffect が refreshUser を呼び出す
     } catch (error: any) {
-      // ログイン失敗時は無効なトークンがあれば削除
-      localStorage.removeItem('token');
-      
-      // より詳細なエラーハンドリング
-      if (error.response?.status === 401) {
-        throw new Error('メールアドレスまたはパスワードが正しくありません');
-      } else if (error.response?.status >= 500) {
-        throw new Error('サーバーエラーが発生しました。しばらく後でお試しください');
-      } else if (error.response?.data?.detail) {
-        throw new Error(error.response.data.detail);
-      } else if (error.message) {
-        throw new Error(error.message);
-      } else {
-        throw new Error('ログインに失敗しました');
-      }
+      console.error('Login error:', error);
+      throw new Error(error.message || 'ログインに失敗しました');
     }
   };
 
-  const register = async (email: string, username: string, password: string) => {
+  const logout = async () => {
     try {
-      // ユーザー登録
-      await client.post('/api/auth/register', {
-        email,
-        username,
-        password,
-      });
-
-      // 登録後、自動的にログイン
-      await login(email, password);
-    } catch (error: any) {
-      console.error('Registration error:', error);
+      // まず認証データをクリア
+      clearAuthData();
+      setUser(null);
       
-      // より詳細なエラーハンドリング
-      if (error.response?.status === 400) {
-        const detail = error.response.data?.detail || '';
-        if (detail.includes('このメールアドレスは既に登録されています')) {
-          throw new Error('このメールアドレスは既に登録されています');
-        } else {
-          throw new Error(detail || '登録時にエラーが発生しました');
-        }
-      } else if (error.response?.status >= 500) {
-        throw new Error('サーバーエラーが発生しました。しばらく後でお試しください');
-      } else if (error.message) {
-        throw new Error(error.message);
-      } else {
-        throw new Error('アカウントの作成に失敗しました');
+      // Firebaseからログアウト
+      await signOut();
+      
+      // ダッシュボードにいる場合は、ログインページにリダイレクト
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/login';
       }
-    }
-  };
-
-  const logout = () => {
-    // トークンとユーザー情報をクリア
-    localStorage.removeItem('token');
-    localStorage.removeItem('remembered_email');
-    setUser(null);
-    
-    // ダッシュボードにいる場合は、ログインページにリダイレクト
-    if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-      window.location.href = '/login';
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      // エラーが発生してもデータはクリアされているので、リダイレクトは実行
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/login';
+      }
     }
   };
 
@@ -147,7 +100,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     loading,
     login,
-    register,
     logout,
     refreshUser,
   };
