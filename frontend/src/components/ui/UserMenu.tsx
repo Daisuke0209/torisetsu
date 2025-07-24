@@ -59,20 +59,20 @@ const UserMenu: React.FC = () => {
       {/* ユーザー情報ボタン */}
       <Button
         variant="ghost"
-        className="flex items-center space-x-3 bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm rounded-full border border-slate-200 dark:border-slate-600 p-2 pl-4 pr-3 hover:bg-white/70 dark:hover:bg-slate-600/50 transition-all duration-200"
+        className="flex items-center space-x-3 bg-white/50 dark:bg-amber-800/50 backdrop-blur-sm rounded-full border border-amber-200 dark:border-amber-600 p-2 pl-4 pr-3 hover:bg-amber-50/70 dark:hover:bg-amber-700/50 transition-all duration-200"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Avatar className="h-8 w-8">
-          <AvatarFallback className="text-sm bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
+          <AvatarFallback className="text-sm bg-gradient-to-br from-amber-600 to-orange-600 text-white font-semibold">
             {user?.username?.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
           {user?.username}
         </span>
         <ChevronDownIcon 
           size={14} 
-          className={`text-slate-500 dark:text-slate-400 transition-transform duration-200 ${
+          className={`text-amber-600 dark:text-amber-400 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`} 
         />
@@ -80,20 +80,20 @@ const UserMenu: React.FC = () => {
 
       {/* ドロップダウンメニュー */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl shadow-slate-500/10 dark:shadow-slate-900/20 py-2 z-50">
+        <div className="absolute right-0 mt-2 w-48 bg-white/95 dark:bg-amber-800/95 backdrop-blur-xl border border-amber-200 dark:border-amber-600 rounded-xl shadow-xl shadow-amber-500/10 dark:shadow-amber-900/20 py-2 z-50">
           {/* ユーザー情報ヘッダー */}
-          <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-600">
+          <div className="px-4 py-2 border-b border-amber-200 dark:border-amber-600">
             <div className="flex items-center space-x-3">
               <Avatar className="h-6 w-6">
-                <AvatarFallback className="text-xs bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
+                <AvatarFallback className="text-xs bg-gradient-to-br from-amber-600 to-orange-600 text-white font-semibold">
                   {user?.username?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-100 truncate">
                   {user?.username}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                <p className="text-xs text-amber-600 dark:text-amber-400 truncate">
                   {user?.email}
                 </p>
               </div>
@@ -105,14 +105,14 @@ const UserMenu: React.FC = () => {
             {/* プロフィール（将来実装） */}
             <button
               onClick={handleProfileClick}
-              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150"
+              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-700/50 transition-colors duration-150"
             >
-              <UserIcon size={16} className="text-slate-500 dark:text-slate-400" />
+              <UserIcon size={16} className="text-amber-600 dark:text-amber-400" />
               <span>プロフィール</span>
             </button>
 
             {/* 区切り線 */}
-            <div className="my-1 border-t border-slate-200 dark:border-slate-600"></div>
+            <div className="my-1 border-t border-amber-200 dark:border-amber-600"></div>
 
             {/* ログアウト */}
             <button

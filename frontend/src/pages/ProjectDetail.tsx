@@ -306,8 +306,8 @@ const ProjectDetail: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
-        <Card className="w-full max-w-md bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-blue-500/10 border-0">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+        <Card className="w-full max-w-md bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl shadow-2xl shadow-amber-500/10 border-0">
           <CardHeader>
             <CardTitle className="text-red-600 dark:text-red-400">エラー</CardTitle>
           </CardHeader>
@@ -317,7 +317,7 @@ const ProjectDetail: React.FC = () => {
               <Button variant="outline" onClick={() => navigate('/dashboard')} className="border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300">
                 ダッシュボードに戻る
               </Button>
-              <Button onClick={() => window.location.reload()} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+              <Button onClick={() => window.location.reload()} className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white">
                 再読み込み
               </Button>
             </div>
@@ -332,7 +332,7 @@ const ProjectDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <Header onLogoClick={() => navigate('/')} />
 
       {/* Main Content */}
@@ -341,8 +341,8 @@ const ProjectDetail: React.FC = () => {
           {/* プロジェクト情報 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center shadow-lg">
-                <FolderIcon size={24} className="text-blue-600 dark:text-blue-400" />
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center shadow-lg">
+                <FolderIcon size={24} className="text-amber-600 dark:text-amber-400" />
               </div>
               <div className="flex-1">
                 {isEditingName ? (
@@ -351,7 +351,7 @@ const ProjectDetail: React.FC = () => {
                       type="text"
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
-                      className="text-2xl font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="text-2xl font-bold bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                       autoFocus
                     />
                     <Button
@@ -398,7 +398,7 @@ const ProjectDetail: React.FC = () => {
             </div>
             <Button 
               onClick={() => setShowCreateModal(true)}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <PlusIcon size={16} />
               トリセツを作成
@@ -429,7 +429,7 @@ const ProjectDetail: React.FC = () => {
               <CardTitle className="mb-2 text-slate-900 dark:text-white">トリセツがありません。</CardTitle>
               <Button 
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 <PlusIcon size={16} />
                 トリセツを作成
@@ -442,7 +442,7 @@ const ProjectDetail: React.FC = () => {
       {/* Torisetsu Delete Confirmation Modal */}
       {showTorisetsuDeleteModal && torisetsuToDelete && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10">
+          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-amber-500/10">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-red-600 dark:text-red-400">
                 <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -497,7 +497,7 @@ const ProjectDetail: React.FC = () => {
       {/* Project Delete Confirmation Modal */}
       {showDeleteModal && project && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10">
+          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-amber-500/10">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-red-600 dark:text-red-400">
                 <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -551,7 +551,7 @@ const ProjectDetail: React.FC = () => {
       {/* Create Torisetsu Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-blue-500/10" onClick={(e) => e.stopPropagation()}>
+          <Card className="w-full max-w-md bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-0 shadow-2xl shadow-amber-500/10" onClick={(e) => e.stopPropagation()}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-slate-900 dark:text-white">
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center">

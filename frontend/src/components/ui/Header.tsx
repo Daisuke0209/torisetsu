@@ -31,16 +31,40 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-3">
             <div 
-              className="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200" 
+              className="cursor-pointer hover:scale-105 transition-transform duration-200 relative" 
               onClick={handleLogoClick}
             >
-              <span className="text-white font-bold text-lg">{APP_CONFIG.logoIcon}</span>
+              {/* 本のデザイン */}
+              <div className="w-10 h-12 bg-gradient-to-r from-amber-400 to-orange-500 rounded-r-lg shadow-lg relative">
+                {/* 本の背表紙 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 rounded-r-lg"></div>
+                
+                {/* 本の端 */}
+                <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-amber-600 to-orange-700 rounded-l-sm"></div>
+                
+                {/* ページの端 */}
+                <div className="absolute right-0 top-0.5 w-0.5 h-11 bg-white/40 rounded-r-sm"></div>
+                <div className="absolute right-0.5 top-1 w-0.5 h-10 bg-white/30 rounded-r-sm"></div>
+                
+                {/* しおり */}
+                <div className="absolute left-0.5 top-1 w-0.5 h-5 bg-red-500 rounded-full"></div>
+                
+                {/* 本のタイトル部分 */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-white text-xs font-bold transform -rotate-90 whitespace-nowrap">
+                    T
+                  </div>
+                </div>
+              </div>
+              
+              {/* 影 */}
+              <div className="absolute top-1 left-1 w-10 h-12 bg-amber-900/30 rounded-r-lg -z-10"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                 {title || APP_CONFIG.name}
               </h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400 -mt-1">
+              <p className="text-xs text-amber-700 dark:text-amber-300 -mt-1">
                 {subtitle || APP_CONFIG.subtitle}
               </p>
             </div>
