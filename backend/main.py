@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
 from database import engine, Base
-from routers import auth, projects, manuals, upload, torisetsu
+from routers import auth, auth_firebase, projects, manuals, upload, torisetsu
 from config import settings
 
 # .envファイルから環境変数を読み込む
@@ -41,6 +41,7 @@ app.add_middleware(
 
 # ルーターを登録
 app.include_router(auth.router, prefix="/api/auth", tags=["認証"])
+app.include_router(auth_firebase.router, prefix="/api/auth", tags=["Firebase認証"])
 app.include_router(projects.router, prefix="/api/projects", tags=["プロジェクト"])
 app.include_router(torisetsu.router, prefix="/api/torisetsu", tags=["トリセツ"])
 app.include_router(manuals.router, prefix="/api/manuals", tags=["マニュアル"])

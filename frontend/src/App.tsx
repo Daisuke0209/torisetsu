@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 import Login from './pages/Login';
-import Register from './pages/Register';
+// import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProjectDetail from './pages/ProjectDetail';
 import ManualEditor from './pages/ManualEditor';
@@ -23,7 +23,7 @@ function App() {
         <div className="App">
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/register" element={<Navigate to="/login" />} />
             <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/project/:id" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
             <Route path="/torisetsu/:id" element={<PrivateRoute><TorisetsuDetail /></PrivateRoute>} />
