@@ -11,6 +11,15 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     
+    # Firebase settings
+    google_application_credentials: Optional[str] = None
+    firebase_project_id: Optional[str] = None
+    firebase_private_key_id: Optional[str] = None
+    firebase_private_key: Optional[str] = None
+    firebase_client_email: Optional[str] = None
+    firebase_client_id: Optional[str] = None
+    firebase_client_cert_url: Optional[str] = None
+    
     # Gemini API settings
     gemini_api_key: Optional[str] = None
     gemini_model: str = "gemini-2.0-flash"
