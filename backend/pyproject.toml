@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "guidify-backend"
+name = "torisetsu-backend"
 version = "0.1.0"
-description = "Guidify - マニュアル作成自動化アプリのバックエンド"
+description = "TORISETSU - マニュアル作成自動化アプリのバックエンド"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
 package-mode = false
