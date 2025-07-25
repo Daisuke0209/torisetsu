@@ -9,6 +9,7 @@ import Input from '../components/ui/Input';
 import { Badge } from '../components/ui/badge';
 import { PlusIcon, FolderIcon, TrashIcon } from '../components/ui/Icons';
 import Header from '../components/ui/Header';
+import SetupWizard from '../components/SetupWizard';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -20,10 +21,36 @@ const Dashboard: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
+  const [checkingUserStatus, setCheckingUserStatus] = useState(true);
 
   useEffect(() => {
-    fetchData();
+    checkUserStatusAndFetchData();
   }, []);
+
+  const checkUserStatusAndFetchData = async () => {
+    try {
+      // ユーザーステータスを確認
+      const statusResponse = await client.get('/api/auth/me/status');
+      const { has_project, project_count } = statusResponse.data;
+      
+      // データを取得
+      await fetchData();
+      
+      // プロジェクトがない場合のみウィザードを表示
+      if (!has_project || project_count === 0) {
+        setShowSetupWizard(true);
+      } else {
+        setShowSetupWizard(false);
+      }
+    } catch (error) {
+      console.error('ユーザーステータス確認エラー:', error);
+      // エラーが発生してもデータ取得は試みる
+      await fetchData();
+    } finally {
+      setCheckingUserStatus(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -54,6 +81,7 @@ const Dashboard: React.FC = () => {
       
       setShowCreateModal(false);
       setNewProjectName('');
+      setShowSetupWizard(false); // ウィザードを非表示に
       await fetchData();
     } catch (error: any) {
       console.error('プロジェクト作成エラー:', error);
@@ -85,7 +113,18 @@ const Dashboard: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  if (loading) {
+  const handleWizardComplete = (projectId: string, torisetsuId: string, manualId?: string) => {
+    setShowSetupWizard(false);
+    // データを再取得
+    fetchData();
+    
+    // マニュアルが作成された場合は成功メッセージを表示
+    if (manualId) {
+      console.log('マニュアルが作成されました:', manualId);
+    }
+  };
+
+  if (loading || checkingUserStatus) {
     return <div className="loading">読み込み中...</div>;
   }
 
@@ -285,6 +324,12 @@ const Dashboard: React.FC = () => {
           </Card>
         </div>
       )}
+
+      {/* Setup Wizard */}
+      <SetupWizard 
+        open={showSetupWizard} 
+        onComplete={handleWizardComplete}
+      />
     </div>
   );
 };
