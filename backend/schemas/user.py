@@ -29,3 +29,10 @@ class User(UserBase):
     
     class Config:
         from_attributes = True
+
+class UserStatus(BaseModel):
+    has_project: bool
+    project_count: int
+    
+    class Config:
+        from_attributes = True
