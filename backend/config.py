@@ -4,7 +4,7 @@ import os
 
 class Settings(BaseSettings):
     # Database settings
-    database_url: str = "postgresql://guidify:guidify_password@localhost:5432/guidify_db"
+    database_url: str = "postgresql://torisetsu:torisetsu_password@localhost:5432/torisetsu_db"
     
     # Authentication settings
     secret_key: str = "your-secret-key-here-please-change-in-production"
